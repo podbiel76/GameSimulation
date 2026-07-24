@@ -1,0 +1,71 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [21.0122, 52.2297] },
+      "properties": {
+        "id": "asmt-001",
+        "severity": "high",
+        "rule_id": "FORCE_CONCENTRATION",
+        "description": "High concentration of military assets detected within 5km radius",
+        "triggered_at": "2025-04-20T18:00:00Z",
+        "affected_detections": ["det-001"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [19.80, 51.60],
+          [20.60, 51.60],
+          [20.60, 52.00],
+          [19.80, 52.00],
+          [19.80, 51.60]
+        ]]
+      },
+      "properties": {
+        "id": "asmt-002",
+        "severity": "medium",
+        "rule_id": "MOVEMENT_CORRIDOR",
+        "description": "Multiple tracked units converging on same corridor",
+        "triggered_at": "2025-04-20T17:30:00Z",
+        "affected_tracks": ["trk-a1b2c3d4", "trk-11223344"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [18.6466, 54.3520] },
+      "properties": {
+        "id": "asmt-003",
+        "severity": "low",
+        "rule_id": "RADAR_COVERAGE",
+        "description": "New radar installation extends detection coverage",
+        "triggered_at": "2025-04-20T16:00:00Z",
+        "affected_detections": ["det-003"]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [17.80, 51.30],
+          [19.60, 51.30],
+          [19.60, 51.80],
+          [17.80, 51.80],
+          [17.80, 51.30]
+        ]]
+      },
+      "properties": {
+        "id": "asmt-004",
+        "severity": "high",
+        "rule_id": "SUPPLY_LINE_THREAT",
+        "description": "Armored brigade movement threatens main supply route",
+        "triggered_at": "2025-04-20T15:00:00Z",
+        "affected_tracks": ["trk-11223344"]
+      }
+    }
+  ]
+}

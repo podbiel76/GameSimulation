@@ -1,0 +1,254 @@
+[
+  {
+    "name": "infantry_company_full_open_neutral",
+    "input": {
+      "unit": {
+        "id": "u1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "base_speed_kmh": 10,
+        "readiness_status": "ready",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "fuel_liters": 2000,
+          "combat_effectiveness_percent": 100
+        }
+      },
+      "terrain": "open",
+      "role": "neutral"
+    },
+    "expected": {
+      "infantry": 1,
+      "armor": 0,
+      "artillery": 0.3,
+      "anti_air": 0.7,
+      "air": 0,
+      "readinessModifier": 1,
+      "personnelModifier": 1,
+      "mobilityModifier": 0.25,
+      "terrainModifier": 1,
+      "combatEffectivenessModifier": 1,
+      "staticPotential": 0.395,
+      "effectivePotential": 0.09875,
+      "role": "neutral",
+      "terrain": "open"
+    }
+  },
+  {
+    "name": "infantry_company_depleted_forest_defender",
+    "input": {
+      "unit": {
+        "id": "u2",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "base_speed_kmh": 10,
+        "readiness_status": "limited",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 50,
+          "ammo_small_arms": 800,
+          "ammo_at": 5,
+          "ammo_mortar": 40,
+          "fuel_liters": 500,
+          "combat_effectiveness_percent": 60
+        }
+      },
+      "terrain": "forest",
+      "role": "defender"
+    },
+    "expected": {
+      "infantry": 0.018666666666666665,
+      "armor": 0,
+      "artillery": 0.013999999999999999,
+      "anti_air": 0.175,
+      "air": 0,
+      "readinessModifier": 0.7,
+      "personnelModifier": 0.48333333333333334,
+      "mobilityModifier": 0.1,
+      "terrainModifier": 1.3,
+      "combatEffectivenessModifier": 0.6,
+      "staticPotential": 0.025666666666666664,
+      "effectivePotential": 0.0006773433333333331,
+      "role": "defender",
+      "terrain": "forest"
+    }
+  },
+  {
+    "name": "armor_battalion_full_road_attacker",
+    "input": {
+      "unit": {
+        "id": "u3",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "base_speed_kmh": 40,
+        "readiness_status": "ready",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_small_arms": 9000,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "fuel_liters": 480,
+          "fuel_capacity_liters": 500,
+          "combat_effectiveness_percent": 100
+        }
+      },
+      "terrain": "road",
+      "role": "attacker"
+    },
+    "expected": {
+      "infantry": 0.675,
+      "armor": 0.8064000000000001,
+      "artillery": 0,
+      "anti_air": 0.5599999999999999,
+      "air": 0,
+      "readinessModifier": 1,
+      "personnelModifier": 1,
+      "mobilityModifier": 0.6719999999999999,
+      "terrainModifier": 1.15,
+      "combatEffectivenessModifier": 1,
+      "staticPotential": 0.46667000000000003,
+      "effectivePotential": 0.36064257599999994,
+      "role": "attacker",
+      "terrain": "road"
+    }
+  },
+  {
+    "name": "armor_battalion_no_fuel_open_neutral",
+    "input": {
+      "unit": {
+        "id": "u4",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "base_speed_kmh": 40,
+        "readiness_status": "ready",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_small_arms": 9000,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "fuel_liters": 0,
+          "fuel_capacity_liters": 500,
+          "combat_effectiveness_percent": 100
+        }
+      },
+      "terrain": "open",
+      "role": "neutral"
+    },
+    "expected": {
+      "infantry": 0.675,
+      "armor": 0,
+      "artillery": 0,
+      "anti_air": 0.5599999999999999,
+      "air": 0,
+      "readinessModifier": 1,
+      "personnelModifier": 1,
+      "mobilityModifier": 0.2,
+      "terrainModifier": 1,
+      "combatEffectivenessModifier": 1,
+      "staticPotential": 0.22475,
+      "effectivePotential": 0.044950000000000004,
+      "role": "neutral",
+      "terrain": "open"
+    }
+  },
+  {
+    "name": "artillery_battery_urban_defender",
+    "input": {
+      "unit": {
+        "id": "u5",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "base_speed_kmh": 10,
+        "readiness_status": "ready",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500,
+          "combat_effectiveness_percent": 95
+        }
+      },
+      "terrain": "urban",
+      "role": "defender"
+    },
+    "expected": {
+      "infantry": 0.08796296296296297,
+      "armor": 0,
+      "artillery": 0.9444444444444444,
+      "anti_air": 0,
+      "air": 0,
+      "readinessModifier": 1,
+      "personnelModifier": 1,
+      "mobilityModifier": 0.2,
+      "terrainModifier": 1.2,
+      "combatEffectivenessModifier": 0.95,
+      "staticPotential": 0.25810185185185186,
+      "effectivePotential": 0.05884722222222222,
+      "role": "defender",
+      "terrain": "urban"
+    }
+  },
+  {
+    "name": "infantry_squad_minimal_water_attacker",
+    "input": {
+      "unit": {
+        "id": "u6",
+        "symbol_name": "Infantry Squad",
+        "unit_type": "infantry",
+        "echelon": "squad",
+        "base_speed_kmh": 8,
+        "readiness_status": "incomplete",
+        "logistics": {
+          "personnel_total": 9,
+          "personnel_available": 4,
+          "ammo_small_arms": 120,
+          "ammo_at": 2,
+          "fuel_liters": 100,
+          "combat_effectiveness_percent": 40
+        }
+      },
+      "terrain": "water",
+      "role": "attacker"
+    },
+    "expected": {
+      "infantry": 0.021333333333333336,
+      "armor": 0,
+      "artillery": 0,
+      "anti_air": 0.35,
+      "air": 0,
+      "readinessModifier": 0.4,
+      "personnelModifier": 0.5222222222222221,
+      "mobilityModifier": 0.14,
+      "terrainModifier": 0.03,
+      "combatEffectivenessModifier": 0.4,
+      "staticPotential": 0.04033333333333333,
+      "effectivePotential": 0.00001415431111111111,
+      "role": "attacker",
+      "terrain": "water"
+    }
+  }
+]

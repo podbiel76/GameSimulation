@@ -1,0 +1,16 @@
+# Środowisko i trening agenta RL (abstrakcyjny symulator).
+# Instalacja:  pip install -r rl/requirements.txt
+
+numpy>=1.26
+gymnasium>=0.29
+pytest>=8.0
+
+# Eksport terenu z kafelków mapy (rl/terrain/export_terrain.py):
+Pillow>=10.0
+
+# Trening (kamienie M4+) — odkomentuj gdy potrzebne:
+# stable-baselines3>=2.3
+# torch>=2.2
+# onnx>=1.16
+# onnxruntime>=1.18
+# shapely>=2.0          # nakładanie wielokątów AO (port polygonsOverlap)

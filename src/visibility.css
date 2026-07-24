@@ -1,0 +1,141 @@
+
+/* ─── Echelon Visibility Control ────────────────────────────────────── */
+.echelon-visibility-section {
+  padding: 4px 8px 8px;
+}
+
+.echelon-preset-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.echelon-preset-btn {
+  padding: 6px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.echelon-preset-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-active);
+  color: var(--text-primary);
+}
+
+.echelon-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 8px;
+}
+
+.echelon-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.echelon-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.echelon-toggle-row.active {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.echelon-toggle-checkbox {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-subtle);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.echelon-toggle-checkbox:checked {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.echelon-toggle-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.echelon-toggle-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.echelon-toggle-row.active .echelon-toggle-label {
+  color: var(--text-primary);
+}
+
+/* ─── Unit Designation Section ────────────────────────────────────── */
+.unit-designation-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.designation-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.designation-input {
+  flex: 1;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.designation-input:focus {
+  outline: none;
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 2px var(--accent-blue-glow);
+}
+
+.designation-input.error {
+  border-color: var(--accent-red);
+}
+
+.form-error {
+  color: var(--accent-red);
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 500;
+}

@@ -1,0 +1,75 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [21.05, 52.25],
+          [20.80, 52.10],
+          [20.60, 51.95],
+          [20.48, 51.75],
+          [20.30, 51.60],
+          [19.95, 51.50]
+        ]
+      },
+      "properties": {
+        "track_id": "trk-a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "confidence": 0.88,
+        "unit_type": "mechanized_infantry",
+        "speed_kmh": 45,
+        "heading": 225,
+        "start_time": "2025-04-20T12:00:00Z",
+        "end_time": "2025-04-20T18:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [18.65, 54.35],
+          [18.90, 54.20],
+          [19.20, 54.00],
+          [19.50, 53.80],
+          [19.80, 53.60],
+          [20.10, 53.40],
+          [20.40, 53.20]
+        ]
+      },
+      "properties": {
+        "track_id": "trk-f7e6d5c4-b3a2-1098-7654-321fedcba987",
+        "confidence": 0.75,
+        "unit_type": "logistics_convoy",
+        "speed_kmh": 60,
+        "heading": 160,
+        "start_time": "2025-04-20T08:00:00Z",
+        "end_time": "2025-04-20T16:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [17.04, 51.10],
+          [17.50, 51.30],
+          [18.00, 51.45],
+          [18.50, 51.55],
+          [19.00, 51.60],
+          [19.45, 51.76]
+        ]
+      },
+      "properties": {
+        "track_id": "trk-11223344-5566-7788-99aa-bbccddeeff00",
+        "confidence": 0.92,
+        "unit_type": "armored_brigade",
+        "speed_kmh": 35,
+        "heading": 75,
+        "start_time": "2025-04-20T06:00:00Z",
+        "end_time": "2025-04-20T14:00:00Z"
+      }
+    }
+  ]
+}

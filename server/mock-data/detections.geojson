@@ -1,0 +1,71 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [21.0122, 52.2297] },
+      "properties": {
+        "id": "det-001",
+        "symbol_type": "SAM",
+        "confidence": 0.92,
+        "timestamp": "2025-04-20T14:32:00Z",
+        "description": "Suspected surface-to-air missile system"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [19.9450, 50.0647] },
+      "properties": {
+        "id": "det-002",
+        "symbol_type": "APC",
+        "confidence": 0.87,
+        "timestamp": "2025-04-20T15:10:00Z",
+        "description": "Armored personnel carrier convoy"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [18.6466, 54.3520] },
+      "properties": {
+        "id": "det-003",
+        "symbol_type": "RADAR",
+        "confidence": 0.78,
+        "timestamp": "2025-04-20T15:45:00Z",
+        "description": "Radar installation detected"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [17.0385, 51.1000] },
+      "properties": {
+        "id": "det-004",
+        "symbol_type": "HQ",
+        "confidence": 0.65,
+        "timestamp": "2025-04-20T16:20:00Z",
+        "description": "Possible command post"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [20.4830, 51.7470] },
+      "properties": {
+        "id": "det-005",
+        "symbol_type": "ARTY",
+        "confidence": 0.94,
+        "timestamp": "2025-04-20T17:00:00Z",
+        "description": "Artillery battery position"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [19.4560, 51.7592] },
+      "properties": {
+        "id": "det-006",
+        "symbol_type": "DEPOT",
+        "confidence": 0.71,
+        "timestamp": "2025-04-20T17:30:00Z",
+        "description": "Logistics depot"
+      }
+    }
+  ]
+}

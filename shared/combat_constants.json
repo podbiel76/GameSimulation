@@ -1,0 +1,121 @@
+{
+  "_meta": {
+    "purpose": "Single source of truth for the ABSTRACT combat-potential simulator constants.",
+    "disclaimer": "Abstrakcyjny model symulacyjny — NIE realne doradztwo taktyczne, brak wartości doktrynalnych.",
+    "consumed_by": ["src/utils/combatPotential.ts", "src/utils/attritionRules.ts", "src/hooks/useLocalSimulation.ts", "rl/ (Python env)"],
+    "parity": "TS i Python muszą dawać identyczne wyniki na golden cases (rl/parity)."
+  },
+
+  "simulation": {
+    "tick_ms": 100,
+    "engagement_check_ticks": 10,
+    "attrition_persist_ticks": 50,
+    "attrition_coefficient": 0.02,
+    "side_defeat_potential_display": 1.0,
+    "side_defeat_effective_sum_threshold": 0.01,
+    "terrainSpeedModifiers": { "open": 1.0, "road": 1.3, "urban": 0.7, "forest": 0.5, "wetland": 0.4, "water": 0.1 }
+  },
+
+  "potential": {
+    "categoryWeights": { "infantry": 0.25, "armor": 0.30, "artillery": 0.25, "anti_air": 0.10, "air": 0.10 },
+    "terrainModifiers":        { "road": 1.05, "open": 1.00, "urban": 0.85, "forest": 0.75, "wetland": 0.45, "water": 0.05 },
+    "terrainModifiersAttacker":{ "road": 1.15, "open": 1.00, "urban": 0.70, "forest": 0.60, "wetland": 0.35, "water": 0.03 },
+    "terrainModifiersDefender":{ "road": 0.75, "open": 0.70, "urban": 1.20, "forest": 1.30, "wetland": 1.00, "water": 0.10 },
+    "terrainModifierClamp": [0, 2.0],
+
+    "defaults": {
+      "ammoSmallArmsMax": 10000,
+      "ammoAtMax": 50,
+      "ammoMortarMax": 700,
+      "ammoMainMax": 100,
+      "ammoSecondaryMax": 500,
+      "dronesMax": 20,
+      "fuelCapacityDefault": 500
+    },
+
+    "personnelEffectiveness": {
+      "_comment": "Piecewise-linear: ratio>=p -> value, interpolated between control points. >=0.75 -> 1.0.",
+      "points": [[0.75, 1.0], [0.50, 0.60], [0.25, 0.25], [0.0, 0.0]]
+    },
+
+    "readiness": { "ready": 1.0, "limited": 0.7, "incomplete": 0.4, "destroyed": 0.0, "default": 0.5 },
+
+    "mobility": { "defaultSpeedKmh": 30, "speedRefKmh": 100, "speedWeight": 0.5, "vehicleWeight": 0.3, "fuelWeight": 0.2 },
+
+    "fuelMissingRatioFallback": 0.5,
+
+    "infantry": { "ammoPerSoldierThreshold": 30 },
+    "armor":    { "ammoMainWeight": 0.6, "ammoSecondaryWeight": 0.4, "noDataAmmoAssume": 0.75 },
+    "artillery":{ "indirectFloor": 0.3 },
+    "antiAir":  { "atWeight": 0.7, "droneWeight": 0.3 }
+  },
+
+  "echelonCaps": {
+    "team_crew":            { "ammoSmallArmsMax": 120,         "ammoAtMax": 2,     "ammoMortarMax": 5,        "ammoMainMax": 20,    "ammoSecondaryMax": 100,       "dronesMax": 1,    "fuelCapacityDefault": 80 },
+    "squad":                { "ammoSmallArmsMax": 400,         "ammoAtMax": 4,     "ammoMortarMax": 15,       "ammoMainMax": 40,    "ammoSecondaryMax": 300,       "dronesMax": 2,    "fuelCapacityDefault": 200 },
+    "section":              { "ammoSmallArmsMax": 800,         "ammoAtMax": 6,     "ammoMortarMax": 30,       "ammoMainMax": 60,    "ammoSecondaryMax": 600,       "dronesMax": 3,    "fuelCapacityDefault": 400 },
+    "platoon_detachment":   { "ammoSmallArmsMax": 1500,        "ammoAtMax": 10,    "ammoMortarMax": 80,       "ammoMainMax": 80,    "ammoSecondaryMax": 1500,      "dronesMax": 4,    "fuelCapacityDefault": 800 },
+    "company_battery_troop":{ "ammoSmallArmsMax": 4000,        "ammoAtMax": 20,    "ammoMortarMax": 250,      "ammoMainMax": 200,   "ammoSecondaryMax": 4000,      "dronesMax": 6,    "fuelCapacityDefault": 2000 },
+    "battalion_squadron":   { "ammoSmallArmsMax": 10000,       "ammoAtMax": 50,    "ammoMortarMax": 700,      "ammoMainMax": 100,   "ammoSecondaryMax": 500,       "dronesMax": 20,   "fuelCapacityDefault": 500 },
+    "regiment_group":       { "ammoSmallArmsMax": 30000,       "ammoAtMax": 120,   "ammoMortarMax": 2000,     "ammoMainMax": 300,   "ammoSecondaryMax": 1500,      "dronesMax": 30,   "fuelCapacityDefault": 1500 },
+    "brigade":              { "ammoSmallArmsMax": 100000,      "ammoAtMax": 300,   "ammoMortarMax": 5000,     "ammoMainMax": 800,   "ammoSecondaryMax": 5000,      "dronesMax": 60,   "fuelCapacityDefault": 4000 },
+    "division":             { "ammoSmallArmsMax": 500000,      "ammoAtMax": 800,   "ammoMortarMax": 15000,    "ammoMainMax": 2000,  "ammoSecondaryMax": 15000,     "dronesMax": 150,  "fuelCapacityDefault": 12000 },
+    "corps_mef":            { "ammoSmallArmsMax": 2000000,     "ammoAtMax": 2000,  "ammoMortarMax": 50000,    "ammoMainMax": 6000,  "ammoSecondaryMax": 50000,     "dronesMax": 400,  "fuelCapacityDefault": 40000 },
+    "army":                 { "ammoSmallArmsMax": 8000000,     "ammoAtMax": 6000,  "ammoMortarMax": 180000,   "ammoMainMax": 20000, "ammoSecondaryMax": 200000,    "dronesMax": 1000, "fuelCapacityDefault": 150000 },
+    "army_group_front":     { "ammoSmallArmsMax": 30000000,    "ammoAtMax": 20000, "ammoMortarMax": 600000,   "ammoMainMax": 70000, "ammoSecondaryMax": 700000,    "dronesMax": 3000, "fuelCapacityDefault": 500000 },
+    "region_theater":       { "ammoSmallArmsMax": 100000000,   "ammoAtMax": 60000, "ammoMortarMax": 2000000,  "ammoMainMax": 200000,"ammoSecondaryMax": 2000000,   "dronesMax": 8000, "fuelCapacityDefault": 2000000 }
+  },
+
+  "attrition": {
+    "attackerProfile": { "armorWeight": 0.30, "artilleryWeight": 0.25, "antiAirWeight": 0.10, "effectiveAtAmmoThreshold": 5 },
+    "vehicleKillFactor": { "armorAndAt": 1.0, "armorNoAt": 0.60, "noArmorAt": 0.40, "noArmorNoAt": 0.05 },
+    "armorProtectionFactor": 0.55,
+    "kiaShare": 0.30,
+    "mortarLossRate": 0.8,
+    "droneLossRate": 0.6,
+
+    "saRate":            { "infantry": 3000, "armor": 400, "artillery": 600, "anti_tank": 800 },
+    "atRate":            { "infantry": 150,  "armor": 50,  "artillery": 30,  "anti_tank": 800 },
+    "mortarAmmoRate":    { "infantry": 80,   "armor": 20,  "artillery": 150, "anti_tank": 40 },
+    "combatFuelPerVehicle": { "armor": 0.25, "artillery": 0.18, "anti_tank": 0.15, "infantry": 0.12 },
+
+    "classRules": {
+      "infantry":  { "personnelMultBase": 1.2, "armorShareWeight": 1.5, "artilleryShareWeight": 1.0, "tankLossWeight": 1.0, "ifvLossWeight": 1.0, "armArtLossWeight": 0.8, "ammoMainBurn": 0, "ammoSecondaryBurn": 0, "ceDropMult": 20 },
+      "armor":     { "personnelWeight": 0.3, "vehicleMultBase": 1.0, "armorShareWeight": 0.8, "armArtLossWeight": "vehicleMult", "ammoMainBurn": 8, "ammoSecondaryBurn": 40, "ceDropMult": 12 },
+      "artillery": { "personnelWeight": 0.7, "tankLossWeight": 0.8, "ifvLossWeight": 0.8, "armArtLossWeight": 0.9, "ammoMainBurn": 4, "ammoSecondaryBurn": 20, "ceDropMult": 18 },
+      "anti_tank": { "personnelWeight": 0.8, "tankLossWeight": 0.6, "ifvLossWeight": 0.6, "armArtLossWeight": 0.5, "ammoMainBurn": 0, "ammoSecondaryBurn": 0, "ceDropMult": 15 }
+    }
+  },
+
+  "presumed": {
+    "_comment": "Domniemana logistyka wroga wykrytego ze zdjęcia (detekcja daje pozycję/typ/szczebel, NIE siłę). Abstrakcyjne, nie doktrynowe.",
+    "fillFraction": 0.9,
+    "defaultEchelon": "company_battery_troop",
+    "personnelByEchelon": {
+      "team_crew": 4, "squad": 9, "section": 20, "platoon_detachment": 35,
+      "company_battery_troop": 120, "battalion_squadron": 600, "regiment_group": 1800,
+      "brigade": 4500, "division": 15000, "corps_mef": 45000, "army": 120000,
+      "army_group_front": 350000, "region_theater": 1000000
+    },
+    "armorVehiclesByEchelon": {
+      "platoon_detachment": { "tanks": 3, "ifv": 1 },
+      "company_battery_troop": { "tanks": 10, "ifv": 6 },
+      "battalion_squadron": { "tanks": 40, "ifv": 20 },
+      "regiment_group": { "tanks": 90, "ifv": 60 },
+      "brigade": { "tanks": 120, "ifv": 90 }
+    },
+    "mortarsByEchelon": {
+      "company_battery_troop": 6, "battalion_squadron": 18, "regiment_group": 36, "brigade": 54
+    }
+  },
+
+  "movementFuelBurnPerKm": { "armor": 3.0, "artillery": 1.5, "anti_tank": 1.5, "infantry": 0.2 },
+
+  "movementStepDistanceMeters": 50.0,
+
+  "classification": {
+    "armorTypeKeywords": "panc|armor|tank|czołg|kto|bwp|abrams|leopard|mechani|zmech",
+    "artilleryTypeKeywords": "artyler|artillery|haubic|rakiet|moździerz",
+    "antiTankTypeKeywords": "ppanc|anti.?tank|antitank|przeciwpancern"
+  }
+}

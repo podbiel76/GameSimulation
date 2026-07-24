@@ -1,0 +1,1613 @@
+[
+  {
+    "name": "infantry__bl0.05__armor",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 14.04,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.16000000000000003,
+      "droneLoss": 0.18000000000000002,
+      "ammoSmallArmsBurn": 150,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 7.5,
+      "mortarAmmoBurn": 4,
+      "fuelBurn": 0,
+      "ceDrop": 1
+    }
+  },
+  {
+    "name": "infantry__bl0.05__infantry",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 7.92,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.16000000000000003,
+      "droneLoss": 0.18000000000000002,
+      "ammoSmallArmsBurn": 150,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 7.5,
+      "mortarAmmoBurn": 4,
+      "fuelBurn": 0,
+      "ceDrop": 1
+    }
+  },
+  {
+    "name": "infantry__bl0.05__at",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 9,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.16000000000000003,
+      "droneLoss": 0.18000000000000002,
+      "ammoSmallArmsBurn": 150,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 7.5,
+      "mortarAmmoBurn": 4,
+      "fuelBurn": 0,
+      "ceDrop": 1
+    }
+  },
+  {
+    "name": "infantry__bl0.2__armor",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 56.16,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.6400000000000001,
+      "droneLoss": 0.7200000000000001,
+      "ammoSmallArmsBurn": 600,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 30,
+      "mortarAmmoBurn": 16,
+      "fuelBurn": 0,
+      "ceDrop": 4
+    }
+  },
+  {
+    "name": "infantry__bl0.2__infantry",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 31.68,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.6400000000000001,
+      "droneLoss": 0.7200000000000001,
+      "ammoSmallArmsBurn": 600,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 30,
+      "mortarAmmoBurn": 16,
+      "fuelBurn": 0,
+      "ceDrop": 4
+    }
+  },
+  {
+    "name": "infantry__bl0.2__at",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 36,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0.6400000000000001,
+      "droneLoss": 0.7200000000000001,
+      "ammoSmallArmsBurn": 600,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 30,
+      "mortarAmmoBurn": 16,
+      "fuelBurn": 0,
+      "ceDrop": 4
+    }
+  },
+  {
+    "name": "infantry__bl0.5__armor",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 140.39999999999998,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 1.6,
+      "droneLoss": 1.7999999999999998,
+      "ammoSmallArmsBurn": 1500,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 75,
+      "mortarAmmoBurn": 40,
+      "fuelBurn": 0,
+      "ceDrop": 10
+    }
+  },
+  {
+    "name": "infantry__bl0.5__infantry",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 79.2,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 1.6,
+      "droneLoss": 1.7999999999999998,
+      "ammoSmallArmsBurn": 1500,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 75,
+      "mortarAmmoBurn": 40,
+      "fuelBurn": 0,
+      "ceDrop": 10
+    }
+  },
+  {
+    "name": "infantry__bl0.5__at",
+    "input": {
+      "unit": {
+        "id": "d1",
+        "symbol_name": "Infantry Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 120,
+          "personnel_available": 120,
+          "ammo_small_arms": 4000,
+          "ammo_at": 20,
+          "ammo_mortar": 250,
+          "mortars_total": 4,
+          "mortars_operational": 4,
+          "drones_total": 6,
+          "drones_available": 6,
+          "fuel_liters": 2000
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 90,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 1.6,
+      "droneLoss": 1.7999999999999998,
+      "ammoSmallArmsBurn": 1500,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 75,
+      "mortarAmmoBurn": 40,
+      "fuelBurn": 0,
+      "ceDrop": 10
+    }
+  },
+  {
+    "name": "armor__bl0.05__armor",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 6,
+      "tankLoss": 2.66,
+      "ifvLoss": 1.26,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0.4,
+      "ammoSecondaryBurn": 2,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "armor__bl0.05__infantry",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 6,
+      "tankLoss": 0.09500000000000001,
+      "ifvLoss": 0.045000000000000005,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0.4,
+      "ammoSecondaryBurn": 2,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "armor__bl0.05__at",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 6,
+      "tankLoss": 0.8208000000000002,
+      "ifvLoss": 0.38880000000000003,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0.4,
+      "ammoSecondaryBurn": 2,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "armor__bl0.2__armor",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 24,
+      "tankLoss": 10.64,
+      "ifvLoss": 5.04,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 1.6,
+      "ammoSecondaryBurn": 8,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "armor__bl0.2__infantry",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 24,
+      "tankLoss": 0.38000000000000006,
+      "ifvLoss": 0.18000000000000002,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 1.6,
+      "ammoSecondaryBurn": 8,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "armor__bl0.2__at",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 24,
+      "tankLoss": 3.283200000000001,
+      "ifvLoss": 1.5552000000000001,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 1.6,
+      "ammoSecondaryBurn": 8,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "armor__bl0.5__armor",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 60,
+      "tankLoss": 26.599999999999998,
+      "ifvLoss": 12.6,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 4,
+      "ammoSecondaryBurn": 20,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 6
+    }
+  },
+  {
+    "name": "armor__bl0.5__infantry",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 60,
+      "tankLoss": 0.9500000000000001,
+      "ifvLoss": 0.45,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 4,
+      "ammoSecondaryBurn": 20,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 6
+    }
+  },
+  {
+    "name": "armor__bl0.5__at",
+    "input": {
+      "unit": {
+        "id": "d2",
+        "symbol_name": "Armored Battalion",
+        "unit_type": "armor",
+        "echelon": "battalion_squadron",
+        "logistics": {
+          "personnel_total": 400,
+          "personnel_available": 380,
+          "tanks_total": 40,
+          "tanks_operational": 38,
+          "ifv_total": 20,
+          "ifv_operational": 18,
+          "ammo_main": 90,
+          "ammo_secondary": 450,
+          "ammo_at": 40,
+          "ammo_small_arms": 9000,
+          "fuel_liters": 480
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 60,
+      "tankLoss": 8.208000000000002,
+      "ifvLoss": 3.8880000000000003,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 4,
+      "ammoSecondaryBurn": 20,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 14,
+      "ceDrop": 6
+    }
+  },
+  {
+    "name": "artillery__bl0.05__armor",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.15,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.2700000000000001,
+      "mortarLoss": 0.24000000000000005,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 30,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 1.5,
+      "mortarAmmoBurn": 7.5,
+      "fuelBurn": 1.08,
+      "ceDrop": 0.9
+    }
+  },
+  {
+    "name": "artillery__bl0.05__infantry",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.15,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.013500000000000005,
+      "mortarLoss": 0.24000000000000005,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 30,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 1.5,
+      "mortarAmmoBurn": 7.5,
+      "fuelBurn": 1.08,
+      "ceDrop": 0.9
+    }
+  },
+  {
+    "name": "artillery__bl0.05__at",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.15,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.10800000000000004,
+      "mortarLoss": 0.24000000000000005,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 30,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 1.5,
+      "mortarAmmoBurn": 7.5,
+      "fuelBurn": 1.08,
+      "ceDrop": 0.9
+    }
+  },
+  {
+    "name": "artillery__bl0.2__armor",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 12.6,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 1.0800000000000003,
+      "mortarLoss": 0.9600000000000002,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 120,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 6,
+      "mortarAmmoBurn": 30,
+      "fuelBurn": 1.08,
+      "ceDrop": 3.6
+    }
+  },
+  {
+    "name": "artillery__bl0.2__infantry",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 12.6,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.05400000000000002,
+      "mortarLoss": 0.9600000000000002,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 120,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 6,
+      "mortarAmmoBurn": 30,
+      "fuelBurn": 1.08,
+      "ceDrop": 3.6
+    }
+  },
+  {
+    "name": "artillery__bl0.2__at",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 12.6,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.43200000000000016,
+      "mortarLoss": 0.9600000000000002,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 120,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 6,
+      "mortarAmmoBurn": 30,
+      "fuelBurn": 1.08,
+      "ceDrop": 3.6
+    }
+  },
+  {
+    "name": "artillery__bl0.5__armor",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 31.499999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 2.7,
+      "mortarLoss": 2.4000000000000004,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 300,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 15,
+      "mortarAmmoBurn": 75,
+      "fuelBurn": 1.08,
+      "ceDrop": 9
+    }
+  },
+  {
+    "name": "artillery__bl0.5__infantry",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 31.499999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0.135,
+      "mortarLoss": 2.4000000000000004,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 300,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 15,
+      "mortarAmmoBurn": 75,
+      "fuelBurn": 1.08,
+      "ceDrop": 9
+    }
+  },
+  {
+    "name": "artillery__bl0.5__at",
+    "input": {
+      "unit": {
+        "id": "d3",
+        "symbol_name": "Artillery Battery",
+        "unit_type": "artillery",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 90,
+          "personnel_available": 85,
+          "armored_artillery_total": 6,
+          "armored_artillery_operational": 6,
+          "mortars_total": 6,
+          "mortars_operational": 6,
+          "ammo_mortar": 250,
+          "ammo_small_arms": 1000,
+          "fuel_liters": 1500
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 31.499999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 1.08,
+      "mortarLoss": 2.4000000000000004,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 300,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 15,
+      "mortarAmmoBurn": 75,
+      "fuelBurn": 1.08,
+      "ceDrop": 9
+    }
+  },
+  {
+    "name": "anti_tank__bl0.05__armor",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 0.8999999999999999,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "anti_tank__bl0.05__infantry",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 0.8999999999999999,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "anti_tank__bl0.05__at",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.05,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 0.8999999999999999,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 20,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 2.5,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 0.6000000000000001
+    }
+  },
+  {
+    "name": "anti_tank__bl0.2__armor",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.5999999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "anti_tank__bl0.2__infantry",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.5999999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "anti_tank__bl0.2__at",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.2,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 3.5999999999999996,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 80,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 10,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 2.4000000000000004
+    }
+  },
+  {
+    "name": "anti_tank__bl0.5__armor",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.5,
+        "artilleryShare": 0.2,
+        "antiTankShare": 0.1,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": true
+      }
+    },
+    "expected": {
+      "personnelLoss": 9,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 6
+    }
+  },
+  {
+    "name": "anti_tank__bl0.5__infantry",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.05,
+        "hasEffectiveAT": false,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 9,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 6
+    }
+  },
+  {
+    "name": "anti_tank__bl0.5__at",
+    "input": {
+      "unit": {
+        "id": "d4",
+        "symbol_name": "Antitank Company",
+        "unit_type": "infantry",
+        "echelon": "company_battery_troop",
+        "logistics": {
+          "personnel_total": 60,
+          "personnel_available": 55,
+          "ammo_at": 200,
+          "ammo_small_arms": 2000,
+          "fuel_liters": 800
+        }
+      },
+      "baseLoss": 0.5,
+      "profile": {
+        "armorShare": 0.1,
+        "artilleryShare": 0.1,
+        "antiTankShare": 0.4,
+        "hasEffectiveAT": true,
+        "hasArmoredVehicles": false
+      }
+    },
+    "expected": {
+      "personnelLoss": 9,
+      "tankLoss": 0,
+      "ifvLoss": 0,
+      "armoredArtilleryLoss": 0,
+      "mortarLoss": 0,
+      "droneLoss": 0,
+      "ammoSmallArmsBurn": 200,
+      "ammoMainBurn": 0,
+      "ammoSecondaryBurn": 0,
+      "ammoAtBurn": 25,
+      "mortarAmmoBurn": 0,
+      "fuelBurn": 0,
+      "ceDrop": 6
+    }
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "name": "geotactical",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n vite,api -c cyan,magenta \"vite\" \"node server/proxy.mjs\"",
+    "dev:vite": "vite",
+    "dev:api": "node server/proxy.mjs",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cesium": "^1.142.0",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "lucide-react": "^1.14.0",
+    "ol": "^10.9.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vite-plugin-cesium": "^1.2.23"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "~6.0.2",
+    "vite": "^7.3.3"
+  }
+}

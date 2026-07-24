@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(python -c \"import ast; ast.parse\\(open\\('app/crud.py', encoding='utf-8'\\).read\\(\\)\\); print\\('crud.py OK'\\)\")",
+      "Bash(python -c \"import gymnasium, numpy; print\\('gymnasium', gymnasium.__version__, '| numpy', numpy.__version__\\)\")",
+      "Bash(python -m pip install \"gymnasium>=0.29\")",
+      "Bash(python -m rl.train --steps 4000 --n 3 --n-envs 4 --ent-coef 0.03 --opponent advance --terrain rl/terrain/data/region_otm.npz --terrain-patch --out rl/models/_smoke3v3)",
+      "Bash(grep -nE \"\\\\.context-menu\\(\\\\s|\\\\{|,\\)|\\\\.placement-dialog-overlay|\\\\.placement-dialog\\\\b\" src/index.css)",
+      "Bash(grep -nA12 \"^\\\\.context-menu \\\\{\" src/index.css)",
+      "Bash(grep -nA8 \"\\\\.placement-dialog-overlay\" src/index.css)"
+    ]
+  }
+}
