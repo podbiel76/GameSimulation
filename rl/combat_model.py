@@ -130,11 +130,42 @@ class UnitPotentialResult:
     breakdown: dict[str, Any]
 
 
+# ── Teren: klasa albo rozkład klas (port dominantTerrain / terrainModifierFor) ──
+
+_TERRAIN_ORDER = ("forest", "water", "wetland", "urban", "road", "open")
+
+
+def _dominant_terrain(terrain: str | dict) -> str:
+    """Klasa o największym udziale (remis → kolejność _TERRAIN_ORDER, pusty → open)."""
+    if isinstance(terrain, str):
+        return terrain
+    best, best_share = "open", 0.0
+    for c in _TERRAIN_ORDER:
+        s = terrain.get(c) or 0.0
+        if s > best_share:
+            best, best_share = c, s
+    return best
+
+
+def _terrain_modifier(table: dict, terrain: str | dict) -> float:
+    """Dla rozkładu — średnia z tabeli ważona udziałami klas."""
+    if isinstance(terrain, str):
+        return table.get(terrain, 1.0)
+    total = 0.0
+    acc = 0.0
+    for c in _TERRAIN_ORDER:
+        s = terrain.get(c) or 0.0
+        if s > 0:
+            total += s
+            acc += s * table.get(c, 1.0)
+    return acc / total if total > 0 else table.get("open", 1.0)
+
+
 # ── Główna funkcja (port computeUnitPotential) ─────────────────────────────────
 
 def compute_unit_potential(
     unit: dict,
-    terrain: str = "open",
+    terrain: str | dict = "open",
     role: str = "neutral",
 ) -> UnitPotentialResult:
     caps = _merge_caps(unit.get("echelon"))
@@ -222,7 +253,7 @@ def compute_unit_potential(
     else:
         terrain_table = POTENTIAL["terrainModifiers"]
     clamp_lo, clamp_hi = POTENTIAL["terrainModifierClamp"]
-    terrain_modifier = _clamp(terrain_table.get(terrain, 1.0), clamp_lo, clamp_hi)
+    terrain_modifier = _clamp(_terrain_modifier(terrain_table, terrain), clamp_lo, clamp_hi)
     ce_modifier_final = ce_modifier
 
     effective_potential = _clamp(
@@ -232,26 +263,25 @@ def compute_unit_potential(
     )
 
     name = unit.get("custom_name") or unit.get("symbol_name") or unit.get("id")
-    return UnitPotentialResult(
-        unitId=unit.get("id"),
-        unitName=name,
-        breakdown={
-            "infantry": infantry_raw,
-            "armor": armor_raw,
-            "artillery": artillery_raw,
-            "anti_air": anti_air_raw,
-            "air": air_raw,
-            "readinessModifier": readiness_modifier,
-            "personnelModifier": personnel_modifier,
-            "mobilityModifier": mobility_modifier,
-            "terrainModifier": terrain_modifier,
-            "combatEffectivenessModifier": ce_modifier_final,
-            "staticPotential": static_potential,
-            "effectivePotential": effective_potential,
-            "role": role,
-            "terrain": terrain,
-        },
-    )
+    breakdown = {
+        "infantry": infantry_raw,
+        "armor": armor_raw,
+        "artillery": artillery_raw,
+        "anti_air": anti_air_raw,
+        "air": air_raw,
+        "readinessModifier": readiness_modifier,
+        "personnelModifier": personnel_modifier,
+        "mobilityModifier": mobility_modifier,
+        "terrainModifier": terrain_modifier,
+        "combatEffectivenessModifier": ce_modifier_final,
+        "staticPotential": static_potential,
+        "effectivePotential": effective_potential,
+        "role": role,
+        "terrain": _dominant_terrain(terrain),
+    }
+    if isinstance(terrain, dict):
+        breakdown["terrainMix"] = terrain
+    return UnitPotentialResult(unitId=unit.get("id"), unitName=name, breakdown=breakdown)
 
 
 # ── Atrycja (port attritionRules.ts) ───────────────────────────────────────────

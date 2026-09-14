@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "cesium": "^1.142.0",
     "concurrently": "^9.2.1",
     "cors": "^2.8.6",

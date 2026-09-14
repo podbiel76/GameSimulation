@@ -22,6 +22,23 @@
     "terrainModifiersAttacker":{ "road": 1.15, "open": 1.00, "urban": 0.70, "forest": 0.60, "wetland": 0.35, "water": 0.03 },
     "terrainModifiersDefender":{ "road": 0.75, "open": 0.70, "urban": 1.20, "forest": 1.30, "wetland": 1.00, "water": 0.10 },
     "terrainModifierClamp": [0, 2.0],
+    "terrainProfile": {
+      "_comment": "Obrona: teren w promieniu wokół jednostki. Natarcie, manewr i rola neutralna: rozkład terenu w AO (bez AO — ten sam promień). Źródło: lokalne rastry WorldCover + Copernicus DEM.",
+      "defenseRadiusM": 1500,
+      "roads": {
+        "_comment": "Drogi z OpenStreetMap (Geofabrik) jako klasa 'road'. Szerokość to pas wpływu drogi na manewr, nie sama jezdnia. Droga zastępuje w pikselu tylko wymienione klasy pokrycia — w mieście zabudowa zostaje zabudową, most nad wodą zostaje wodą.",
+        "overridesClasses": ["forest", "open", "wetland"],
+        "corridorWidthM": {
+          "motorway": 60, "motorway_link": 30,
+          "trunk": 50, "trunk_link": 25,
+          "primary": 40, "primary_link": 20,
+          "secondary": 30, "secondary_link": 15,
+          "tertiary": 24, "tertiary_link": 12,
+          "unclassified": 16, "residential": 12,
+          "track_grade1": 10, "track_grade2": 8
+        }
+      }
+    },
 
     "defaults": {
       "ammoSmallArmsMax": 10000,

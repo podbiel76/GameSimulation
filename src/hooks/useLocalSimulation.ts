@@ -7,11 +7,18 @@ import type { UnitArea } from "../api/unitAreasApi";
 import type { MapViewHandle } from "../map/MapView";
 import type { AreaTerrainBreakdown } from "../utils/terrainClassifier";
 import { classifyTerrainFromCanvas, cropTerrainWindow, classifyTerrainForAreaCanvas, TERRAIN_ANALYSIS_ZOOM } from "../utils/terrainClassifier";
-import { moveAreaCoordsByWebMercatorDelta, polygonsOverlap } from "../utils/geoUtils";
+import { moveAreaCoordsByWebMercatorDelta, polygonsOverlap, computeBbox, bboxesOverlap } from "../utils/geoUtils";
+import type { Bbox } from "../utils/geoUtils";
+import { SIM_DEBUG, simLog } from "../utils/debug";
 import { updateUnit, updateUnitLogistics } from "../api/unitsApi";
 import { updatePolygonArea } from "../api/unitAreasApi";
 import { fromLonLat } from "ol/proj";
 import { computeUnitPotential, type TerrainClass } from "../utils/combatPotential";
+import { fetchTerrainProfile } from "../api/terrainApi";
+import { TERRAIN_DEFENSE_RADIUS_M, aoKeyOf, terrainForRole, type UnitTerrainProfile } from "../utils/terrainProfile";
+
+/** Profil terenu odświeżany dopiero po przesunięciu jednostki o tyle metrów. */
+const TERRAIN_REFRESH_DISTANCE_M = 250;
 import {
   buildAttackerProfile,
   computeAttritionComponents,
@@ -123,6 +130,37 @@ export function useLocalSimulation(opts: Options) {
   const simRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const simSpeedRef = useRef(30);
   const simTickCountRef = useRef(0);
+
+  // ── Skala czasu (mnożnik ×1/×8/×20/×60 z górnego paska) ────────────────────
+  // Mnoży dystans pokonywany w ticku. Bezpieczne, bo krok jest mały względem AO:
+  // przy 30 km/h tick to 0,83 m, więc nawet ×60 daje 50 m — a AO mają kilometry.
+  // Gęstość wykrywania starć utrzymujemy stałą w czasie SYMULOWANYM, skracając
+  // odstęp między sprawdzeniami proporcjonalnie do mnożnika.
+  const timeScaleRef = useRef(1);
+  const [timeScale, setTimeScaleState] = useState(1);
+  const setTimeScale = useCallback((v: number) => {
+    timeScaleRef.current = v;
+    setTimeScaleState(v);
+  }, []);
+
+  // Zegar misji w sekundach symulowanych. Trzymany w refie (rośnie co tick),
+  // do stanu przepisywany rzadziej — inaczej wymuszałby render 10×/s.
+  const missionClockRef = useRef(0);
+  const [missionClockSec, setMissionClockSec] = useState(0);
+  const resetMissionClock = useCallback(() => {
+    missionClockRef.current = 0;
+    setMissionClockSec(0);
+  }, []);
+
+  // „Krok 15 min" — przewinięcie o zadany czas symulowany i zatrzymanie.
+  // Realizowane przez zwykłą pętlę z docelową wartością zegara, a nie przez
+  // jeden wielki krok: dzięki temu ruch i wykrywanie starć liczą się tak samo
+  // jak przy normalnym biegu (jeden duży skok mógłby przenieść jednostkę przez
+  // całe AO przeciwnika bez wykrycia kontaktu).
+  const burstTargetRef = useRef<number | null>(null);
+  const scaleBeforeBurstRef = useRef<number | null>(null);
+  // Pętla musi umieć zatrzymać samą siebie, a stopSimulation powstaje niżej.
+  const stopSimulationRef = useRef<(() => void) | null>(null);
   const unitTerrainModifiersRef = useRef<Map<string, number>>(new Map());
   // Dominant terrain class per unit — populated by checkTerrainForUnit / checkTerrainForUnitArea
   const unitTerrainClassRef = useRef<Map<string, string>>(new Map());
@@ -138,7 +176,62 @@ export function useLocalSimulation(opts: Options) {
     simSpeedRef.current = v;
   }, []);
 
+  // Profil terenu z backendu (WorldCover + DEM): obrona — otoczenie jednostki,
+  // natarcie i manewr — AO. Analiza kolorów mapy zostaje jako rezerwa, gdy
+  // backend nie ma danych terenu.
+  const unitTerrainProfileRef = useRef<Map<string, UnitTerrainProfile>>(new Map());
+  const terrainInflightRef = useRef<Set<string>>(new Set());
+  const [, setTerrainProfileVersion] = useState(0);
+
+  const refreshTerrainProfile = useCallback(async (
+    unitId: string,
+    options?: { force?: boolean },
+  ): Promise<UnitTerrainProfile | null> => {
+    const unit = unitsRef.current.find(u => u.id === unitId);
+    if (!unit) return null;
+    const [lon, lat] = toLonLat([unit.x, unit.y]) as [number, number];
+    const area = unitAreasRef.current.find(a => a.unit_id === unitId && a.area_type === "responsibility");
+    const ao = (area?.coordinates as [number, number][] | null | undefined) ?? null;
+    const aoKey = aoKeyOf(ao);
+
+    const prev = unitTerrainProfileRef.current.get(unitId);
+    if (!options?.force && prev && prev.aoKey === aoKey) {
+      const movedM = Math.hypot(
+        (lat - prev.lat) * 110_574,
+        (lon - prev.lon) * 111_320 * Math.cos(lat * Math.PI / 180),
+      );
+      if (movedM < TERRAIN_REFRESH_DISTANCE_M) return prev;
+    }
+    if (terrainInflightRef.current.has(unitId)) return prev ?? null;
+
+    terrainInflightRef.current.add(unitId);
+    try {
+      const res = await fetchTerrainProfile({ lon, lat, radius_m: TERRAIN_DEFENSE_RADIUS_M, ao });
+      const profile: UnitTerrainProfile = { ...res, lon, lat, aoKey, fetchedAt: Date.now() };
+      unitTerrainProfileRef.current.set(unitId, profile);
+      if (res.available && res.local) {
+        unitTerrainClassRef.current.set(unitId, res.local.dominant);
+        // Manewr (prędkość) — rozkład terenu w AO; bez AO — otoczenie jednostki.
+        const shares = res.ao?.shares ?? res.local.shares;
+        const total = Object.values(shares).reduce((s, v) => s + v, 0);
+        const speedMod = total > 0
+          ? Object.entries(shares).reduce((s, [c, v]) => s + (TERRAIN_SPEED_MODIFIERS[c] ?? 1.0) * v, 0) / total
+          : 1.0;
+        unitTerrainModifiersRef.current.set(unitId, speedMod);
+      }
+      setTerrainProfileVersion(v => v + 1);
+      return profile;
+    } catch (err) {
+      console.warn("[TERRAIN] Profil terenu niedostępny:", err);
+      return prev ?? null;
+    } finally {
+      terrainInflightRef.current.delete(unitId);
+    }
+  }, [unitsRef, unitAreasRef]);
+
   const checkTerrainForUnit = useCallback(async (unitId: string) => {
+    const profile = await refreshTerrainProfile(unitId, { force: true });
+    if (profile?.available) return;
     const unit = unitsRef.current.find(u => u.id === unitId);
     if (!unit || !mapHandleRef.current) return;
     const canvasData = mapHandleRef.current.captureCanvasAtZoom([unit.x, unit.y], TERRAIN_ANALYSIS_ZOOM);
@@ -153,9 +246,11 @@ export function useLocalSimulation(opts: Options) {
       unitTerrainClassRef.current.set(unitId, result.terrain);
       setTerrainPreview({ imageUrl: cropUrl ?? "", terrain: result.terrain, confidence: result.confidence });
     }
-  }, [unitsRef, mapHandleRef, setTerrainPreview]);
+  }, [unitsRef, mapHandleRef, setTerrainPreview, refreshTerrainProfile]);
 
   const checkTerrainForUnitArea = useCallback(async (unitId: string) => {
+    const profile = await refreshTerrainProfile(unitId, { force: true });
+    if (profile?.available) return;
     const area = unitAreasRef.current.find(a => a.unit_id === unitId && a.area_type === "responsibility");
     if (!area?.coordinates || !mapHandleRef.current) return;
 
@@ -181,7 +276,7 @@ export function useLocalSimulation(opts: Options) {
       confidence: result.breakdown.find(b => b.terrain === result.dominant)?.percent ?? 0,
       areaBreakdown: result.breakdown,
     });
-  }, [unitAreasRef, mapHandleRef, setTerrainPreview]);
+  }, [unitAreasRef, mapHandleRef, setTerrainPreview, refreshTerrainProfile]);
 
   const startSimulation = useCallback(() => {
     if (simRef.current) return;
@@ -248,11 +343,11 @@ export function useLocalSimulation(opts: Options) {
 
         const unitBaseSpeed = currentUnit?.base_speed_kmh ?? simSpeedRef.current;
         const terrainMod = unitTerrainModifiersRef.current.get(marker.id) ?? 1.0;
-        const speedMpt = unitBaseSpeed * terrainMod * 1000 / 36000;
-        const effectiveKmh = unitBaseSpeed * terrainMod;
-        console.log(
-          `[SIM] ${currentUnit?.custom_name ?? currentUnit?.symbol_name ?? marker.id} | base: ${unitBaseSpeed} km/h | terrain ×${terrainMod.toFixed(2)} | effective: ${effectiveKmh.toFixed(1)} km/h`
-        );
+        const speedMpt = unitBaseSpeed * terrainMod * 1000 / 36000 * timeScaleRef.current;
+        simLog(() => {
+          const effectiveKmh = unitBaseSpeed * terrainMod;
+          return [`[SIM] ${currentUnit?.custom_name ?? currentUnit?.symbol_name ?? marker.id} | base: ${unitBaseSpeed} km/h | terrain ×${terrainMod.toFixed(2)} | effective: ${effectiveKmh.toFixed(1)} km/h`];
+        });
 
         const dx = target.x - oldX;
         const dy = target.y - oldY;
@@ -340,7 +435,10 @@ export function useLocalSimulation(opts: Options) {
       });
 
       // ── Engagement detection & attrition ─────────────────────────────────
-      if (simTickCountRef.current % ENGAGEMENT_CHECK_TICKS === 0) {
+      // Odstęp skalowany mnożnikiem: przy ×60 sprawdzamy co tick, żeby na jedną
+      // sekundę SYMULOWANĄ przypadała ta sama liczba sprawdzeń co przy ×1.
+      const engagementInterval = Math.max(1, Math.round(ENGAGEMENT_CHECK_TICKS / timeScaleRef.current));
+      if (simTickCountRef.current % engagementInterval === 0) {
         const unitMap = new Map(nextUnits.map(u => [u.id, u]));
         const respAreas = nextAreas.filter(
           a => a.area_type === "responsibility" &&
@@ -348,14 +446,19 @@ export function useLocalSimulation(opts: Options) {
                (a.coordinates as unknown[]).length >= 3
         );
         // Destroyed units (no personnel left to fight) drop out of engagements entirely.
-        const friendlyAreas = respAreas.filter(a => {
-          const u = unitMap.get(a.unit_id);
-          return u?.side === "friendly" && !isUnitDestroyed(u as any);
-        });
-        const hostileAreas  = respAreas.filter(a => {
-          const u = unitMap.get(a.unit_id);
-          return u?.side === "hostile" && !isUnitDestroyed(u as any);
-        });
+        // AABB is computed once per area here, not once per pair inside the sweep below.
+        const prepareSide = (side: "friendly" | "hostile") =>
+          respAreas.reduce<{ unitId: string; coords: [number, number][]; bbox: Bbox }[]>((acc, a) => {
+            const u = unitMap.get(a.unit_id);
+            if (u?.side !== side || isUnitDestroyed(u as any)) return acc;
+            if (!a.coordinates) return acc;
+            const coords = a.coordinates as [number, number][];
+            acc.push({ unitId: a.unit_id, coords, bbox: computeBbox(coords) });
+            return acc;
+          }, []);
+
+        const friendlyAreas = prepareSide("friendly");
+        const hostileAreas  = prepareSide("hostile");
 
         // ── Step 1: collect all overlapping pairs ──
         const friendlyToHostiles = new Map<string, Set<string>>();
@@ -363,12 +466,13 @@ export function useLocalSimulation(opts: Options) {
 
         for (const fa of friendlyAreas) {
           for (const ha of hostileAreas) {
-            if (!fa.coordinates || !ha.coordinates) continue;
-            if (!polygonsOverlap(fa.coordinates as [number, number][], ha.coordinates as [number, number][])) continue;
-            if (!friendlyToHostiles.has(fa.unit_id)) friendlyToHostiles.set(fa.unit_id, new Set());
-            friendlyToHostiles.get(fa.unit_id)!.add(ha.unit_id);
-            if (!hostileToFriendlies.has(ha.unit_id)) hostileToFriendlies.set(ha.unit_id, new Set());
-            hostileToFriendlies.get(ha.unit_id)!.add(fa.unit_id);
+            // Broad phase first — disjoint AABBs skip the O(vA×vB) narrow phase entirely.
+            if (!bboxesOverlap(fa.bbox, ha.bbox)) continue;
+            if (!polygonsOverlap(fa.coords, ha.coords, fa.bbox, ha.bbox)) continue;
+            if (!friendlyToHostiles.has(fa.unitId)) friendlyToHostiles.set(fa.unitId, new Set());
+            friendlyToHostiles.get(fa.unitId)!.add(ha.unitId);
+            if (!hostileToFriendlies.has(ha.unitId)) hostileToFriendlies.set(ha.unitId, new Set());
+            hostileToFriendlies.get(ha.unitId)!.add(fa.unitId);
           }
         }
 
@@ -466,6 +570,7 @@ export function useLocalSimulation(opts: Options) {
             u: Unit, role: string,
             b: ReturnType<typeof computeUnitPotential>["breakdown"],
           ) => {
+            if (!SIM_DEBUG) return;
             const lg = u.logistics ?? ({} as any);
             // eslint-disable-next-line no-console
             console.log(
@@ -509,7 +614,9 @@ export function useLocalSimulation(opts: Options) {
             const u = unitMap.get(id);
             if (!u) return null;
             const role = roleForSide("friendly");
-            const b = computeUnitPotential(u as any, toTerrainClass(unitTerrainClassRef.current.get(id)), undefined, role).breakdown;
+            if (!unitTerrainProfileRef.current.has(id)) void refreshTerrainProfile(id);
+            const terrain = terrainForRole(unitTerrainProfileRef.current.get(id), role, toTerrainClass(unitTerrainClassRef.current.get(id)));
+            const b = computeUnitPotential(u as any, terrain, undefined, role).breakdown;
             logPotential(u, role, b);
             return b;
           }).filter(Boolean) as ReturnType<typeof computeUnitPotential>["breakdown"][];
@@ -518,7 +625,9 @@ export function useLocalSimulation(opts: Options) {
             const u = unitMap.get(id);
             if (!u) return null;
             const role = roleForSide("hostile");
-            const b = computeUnitPotential(u as any, toTerrainClass(unitTerrainClassRef.current.get(id)), undefined, role).breakdown;
+            if (!unitTerrainProfileRef.current.has(id)) void refreshTerrainProfile(id);
+            const terrain = terrainForRole(unitTerrainProfileRef.current.get(id), role, toTerrainClass(unitTerrainClassRef.current.get(id)));
+            const b = computeUnitPotential(u as any, terrain, undefined, role).breakdown;
             logPotential(u, role, b);
             return b;
           }).filter(Boolean) as ReturnType<typeof computeUnitPotential>["breakdown"][];
@@ -545,6 +654,7 @@ export function useLocalSimulation(opts: Options) {
             u: Unit, role: string, baseLoss: number,
             c: ReturnType<typeof computeAttritionComponents>,
           ) => {
+            if (!SIM_DEBUG) return;
             const lg = u.logistics ?? ({} as any);
             // eslint-disable-next-line no-console
             console.log(
@@ -685,11 +795,25 @@ export function useLocalSimulation(opts: Options) {
       setUnits(nextUnits);
       setUnitAreas(nextAreas);
 
+      // Zegar misji: 1 tick = 100 ms rzeczywiste × mnożnik czasu.
+      missionClockRef.current += 0.1 * timeScaleRef.current;
+      if (simTickCountRef.current % 5 === 0) setMissionClockSec(missionClockRef.current);
+
+      // Koniec przewijania („Krok 15 min") — zatrzymaj po osiągnięciu celu.
+      if (burstTargetRef.current !== null && missionClockRef.current >= burstTargetRef.current) {
+        setMissionClockSec(missionClockRef.current);
+        stopSimulationRef.current?.();
+      }
+
       simTickCountRef.current++;
       if (anyMovedInTick && simTickCountRef.current % 10 === 0 && movedMarkerIds.length > 0) {
         const tickBatch = Math.floor(simTickCountRef.current / 10);
         const unitIdToCheck = movedMarkerIds[tickBatch % movedMarkerIds.length];
-        if (unitIdToCheck && mapHandleRef.current) {
+        // Backend odświeża profil dopiero po przesunięciu o TERRAIN_REFRESH_DISTANCE_M.
+        const knownProfile = unitIdToCheck ? unitTerrainProfileRef.current.get(unitIdToCheck) : undefined;
+        if (unitIdToCheck) void refreshTerrainProfile(unitIdToCheck);
+        // Analiza kolorów mapy — tylko gdy backend nie ma danych terenu.
+        if (unitIdToCheck && mapHandleRef.current && !knownProfile?.available) {
           const unitToCheck = nextUnits.find(u => u.id === unitIdToCheck);
           if (unitToCheck) {
             const unitArea = nextAreas.find(a => a.unit_id === unitIdToCheck && a.area_type === "responsibility");
@@ -705,7 +829,7 @@ export function useLocalSimulation(opts: Options) {
                   canvasData.image, canvasData.width, canvasData.height,
                   canvasData.dpr, canvasData.pixelCoords,
                 ).then(result => {
-                  if (!result) return;
+                  if (!result || unitTerrainProfileRef.current.get(unitIdToCheck)?.available) return;
                   const mod = weightedTerrainModifier(result.breakdown);
                   unitTerrainModifiersRef.current.set(unitIdToCheck, mod);
                   unitTerrainClassRef.current.set(unitIdToCheck, result.dominant);
@@ -727,7 +851,7 @@ export function useLocalSimulation(opts: Options) {
               if (canvasData) {
                 void classifyTerrainFromCanvas(canvasData.image, canvasData.cx, canvasData.cy, 64, false)
                   .then(result => {
-                    if (!result) return;
+                    if (!result || unitTerrainProfileRef.current.get(unitIdToCheck)?.available) return;
                     const mod = TERRAIN_SPEED_MODIFIERS[result.terrain] ?? 1.0;
                     unitTerrainModifiersRef.current.set(unitIdToCheck, mod);
                     unitTerrainClassRef.current.set(unitIdToCheck, result.terrain);
@@ -783,16 +907,44 @@ export function useLocalSimulation(opts: Options) {
       clearInterval(simRef.current);
       simRef.current = null;
     }
+    // Zdejmij ewentualny tryb przewijania i przywróć tempo sprzed niego.
+    burstTargetRef.current = null;
+    if (scaleBeforeBurstRef.current !== null) {
+      timeScaleRef.current = scaleBeforeBurstRef.current;
+      setTimeScaleState(scaleBeforeBurstRef.current);
+      scaleBeforeBurstRef.current = null;
+    }
     setSimRunning(false);
   }, []);
+
+  stopSimulationRef.current = stopSimulation;
+
+  /** Przewiń symulację o `minutes` minut symulowanych i zatrzymaj. */
+  const stepMinutes = useCallback((minutes: number) => {
+    if (burstTargetRef.current !== null) return;      // już przewijamy
+    burstTargetRef.current = missionClockRef.current + minutes * 60;
+    // Przewijamy przy ×60, żeby 15 minut symulacji zajęło ~15 s realnych.
+    scaleBeforeBurstRef.current = timeScaleRef.current;
+    timeScaleRef.current = 60;
+    setTimeScaleState(60);
+    if (!simRef.current) startSimulation();
+  }, [startSimulation]);
 
   return {
     simRunning,
     simRef,
     simSpeedKmh,
     simSpeedRef,
+    timeScale,
+    setTimeScale,
+    missionClockSec,
+    resetMissionClock,
+    stepMinutes,
+    isStepping: burstTargetRef.current !== null,
     unitTerrainModifiersRef,
     unitTerrainClassRef,
+    unitTerrainProfileRef,
+    refreshTerrainProfile,
     activeEngagementUnitIds,
     activeEngagementsState,
     setSimSpeedKmh,

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { FeatureSelectPayload } from "./MapView";
+import type { FeatureSelectPayload } from "../types/map";
 
 type FeaturePanelProps = {
   data: FeatureSelectPayload | null;

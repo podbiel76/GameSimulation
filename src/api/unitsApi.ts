@@ -27,6 +27,8 @@ export async function createUnit(payload: {
   echelon?: string;
   unit_number?: number | null;
   custom_name?: string | null;
+  base_speed_kmh?: number | null;
+  logistics?: Partial<UpdateUnitLogisticsPayload>;
 }): Promise<Unit> {
   const res = await fetch("/api/units/create", {
     method: "POST",
@@ -35,6 +37,16 @@ export async function createUnit(payload: {
   });
   if (!res.ok) throw new Error("Failed to create unit");
   return res.json();
+}
+
+/** Podporządkowuje jednostkę `childId` jednostce `parentId`. */
+export async function linkSubordinate(parentId: string, childId: string): Promise<void> {
+  const res = await fetch(`/units/${parentId}/subordinates/${childId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ relation_type: "subordinate", order_index: 0 }),
+  });
+  if (!res.ok) throw new Error(`Failed to link subordinate: ${res.status}`);
 }
 
 export async function updateUnit(

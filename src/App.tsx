@@ -1,8 +1,12 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import ScenarioMapView from "./map/MapView";
 import { X, DiamondPlus, Network, SquarePen, Trash2, Route, BrainCircuit, AlertTriangle } from "lucide-react";
+// Górny pasek i zakładki — ikony Phosphor, ten sam zestaw co makieta.
+// Makieta: shield-chevron, tree-structure, play-circle, crosshair, scales, broadcast.
+import { ShieldChevron, TreeStructure, PlayCircle, Crosshair, Scales, Broadcast, Play, Pause, CaretDoubleRight } from "@phosphor-icons/react";
 import type { BaseLayerType, MapViewHandle } from "./map/MapView";
 import { UNIT_HIERARCHY_ORDER, UNIT_CHILDREN } from "./utils/hierarchyVisibility";
+import { unitShortLabel } from "./utils/unitLabel";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { getUnits, deleteUnit, createUnitFromDetection, createChildWithArea } from "./api/unitsApi";
 import { getUnitAreas, updatePolygonArea, deleteUnitAreaCascade, createPolygonArea } from "./api/unitAreasApi";
@@ -23,14 +27,42 @@ import AssessmentPanel from "./components/AssessmentPanel";
 import CombatPotentialPanel from "./components/CombatPotentialPanel";
 import EngagementPanel from "./components/EngagementPanel";
 import UnitPlacementDialog from "./components/UnitPlacementDialog";
+import MapToolRail, { type MapLayerKey } from "./components/MapToolRail";
 import UnitsListPanel from "./components/sidebar/UnitsListPanel";
 import SimulationPanel from "./components/sidebar/SimulationPanel";
+import AcEngagementsPanel from "./components/sidebar/AcEngagementsPanel";
+import AcComparePanel from "./components/sidebar/AcComparePanel";
+import AcMonitoringPanel from "./components/sidebar/AcMonitoringPanel";
 import SelectedUnitPanel from "./components/sidebar/SelectedUnitPanel";
 import "./visibility.css";
 
 let nextId = 1;
 function genId(prefix: string) {
   return `${prefix}-${nextId++}-${Date.now().toString(36)}`;
+}
+
+/** Zakładki górnego paska — kolejność i etykiety z makiety (`tabDef`). */
+const NAV_TABS: { id: SidebarTab; label: string; Icon: typeof TreeStructure }[] = [
+  { id: "units", label: "Jednostki", Icon: TreeStructure },
+  { id: "simulation", label: "Symulacja", Icon: PlayCircle },
+  { id: "alerts", label: "Starcia", Icon: Crosshair },
+  { id: "comparison", label: "Porównaj", Icon: Scales },
+  { id: "monitoring", label: "Monitoring", Icon: Broadcast },
+];
+
+/** Zakładki przepisane już 1:1 na makietę — używają powłoki `ac-left` (332 px).
+    Pozostałe wciąż na starym `.sidebar` (380 px), do przepisania. */
+const AC_LEFT_TABS = new Set<SidebarTab>([
+  "units", "simulation", "alerts", "comparison", "monitoring",
+]);
+
+/** Zegar misji HH:MM:SS z sekund symulowanych. */
+function formatMissionClock(totalSec: number): string {
+  const s = Math.max(0, Math.floor(totalSec));
+  const hh = String(Math.floor(s / 3600)).padStart(2, "0");
+  const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+  const ss = String(s % 60).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
 }
 
 export default function App() {
@@ -81,8 +113,11 @@ export default function App() {
 
   // Base layer
   const [baseLayer, setBaseLayer] = useState<BaseLayerType>("osm");
-  const [layerMenuOpen, setLayerMenuOpen] = useState(false);
   const [showAreasLayer, setShowAreasLayer] = useState(true);
+  // Warstwy z panelu w prawej kolumnie narzędzi mapy.
+  const [showTaskGraphics, setShowTaskGraphics] = useState(true);
+  const [showTracks, setShowTracks] = useState(true);
+  const [showGrid, setShowGrid] = useState(true);
   const [refreshAreasTrigger, setRefreshAreasTrigger] = useState(0);
 
   // Context menu & placement dialog
@@ -94,8 +129,15 @@ export default function App() {
   } | null>(null);
   const [placementDialog, setPlacementDialog] = useState<{
     lonLat: [number, number];
-    coordinate: [number, number];
+    /** true — okno ukryte, użytkownik wskazuje położenie kliknięciem w mapę. */
+    picking?: boolean;
   } | null>(null);
+  const placementPickingRef = useRef(false);
+  placementPickingRef.current = !!placementDialog?.picking;
+  /** Esc podczas wskazywania wraca do okna zamiast je zamykać. */
+  const escapePlacementDialog = useCallback(() => {
+    setPlacementDialog(prev => (prev?.picking ? { ...prev, picking: false } : null));
+  }, []);
   const [isHierarchicalZoom, setIsHierarchicalZoom] = useState(false);
 
   const [subordinateUnitNumber, setSubordinateUnitNumber] = useState<string>("");
@@ -296,6 +338,11 @@ export default function App() {
     simRunning,
     simSpeedKmh,
     setSimSpeedKmh,
+    timeScale,
+    setTimeScale,
+    missionClockSec,
+    resetMissionClock,
+    stepMinutes,
     startSimulation,
     stopSimulation,
     unitTerrainClassRef,
@@ -304,6 +351,8 @@ export default function App() {
     activeEngagementsState,
     checkTerrainForUnit,
     checkTerrainForUnitArea,
+    unitTerrainProfileRef,
+    refreshTerrainProfile,
   } = useLocalSimulation({
     markersRef,
     unitsRef,
@@ -319,6 +368,12 @@ export default function App() {
     refreshAreas,
     onUnitDefeated: handleUnitDefeated,
   });
+
+  // Profil terenu zaznaczonej jednostki — przy wyborze i po zmianie AO
+  // (backend trzyma cache, a hook pomija zapytanie, gdy nic się nie zmieniło).
+  useEffect(() => {
+    if (selectedUnitId) void refreshTerrainProfile(selectedUnitId);
+  }, [selectedUnitId, unitAreas, refreshTerrainProfile]);
 
   // Wpnij trasy agenta w markery (używane w trybie "Steruje" i przez "Zastosuj").
   const applyAgentRoutes = useCallback((routes: AgentRoute[]) => {
@@ -524,7 +579,7 @@ export default function App() {
           cancelDrawRoute();
           return;
         }
-        setPlacementDialog(null);
+        escapePlacementDialog();
         setContextMenu(null);
         setRadialMenu(null);
         if (mode === "draw-area" || mode === "edit-area" || mode === "draw-subordinate-area") {
@@ -697,6 +752,10 @@ export default function App() {
   const handleMapClick = useCallback(
     async (coord: [number, number]) => {
       setContextMenu(null);
+      if (placementPickingRef.current) {
+        setPlacementDialog({ lonLat: toLonLat(coord) as [number, number], picking: false });
+        return;
+      }
       if (mode === "draw-area" || mode === "edit-area") {
         setAreaDraftPoints(prev => [...prev, coord]);
         return;
@@ -953,7 +1012,7 @@ export default function App() {
 
   const handlePlaceUnitHere = useCallback(() => {
     if (!contextMenu) return;
-    setPlacementDialog({ lonLat: contextMenu.lonLat, coordinate: contextMenu.coordinate });
+    setPlacementDialog({ lonLat: contextMenu.lonLat });
     setContextMenu(null);
   }, [contextMenu]);
 
@@ -964,7 +1023,7 @@ export default function App() {
   // Cancellation listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setContextMenu(null); setPlacementDialog(null); }
+      if (e.key === "Escape") { setContextMenu(null); escapePlacementDialog(); }
     };
     const handleClickAway = () => setContextMenu(null);
     window.addEventListener("keydown", handleKeyDown);
@@ -975,46 +1034,95 @@ export default function App() {
     };
   }, []);
 
-  const BASE_LAYERS: { id: BaseLayerType; label: string; icon: string }[] = [
-    { id: "osm", label: "OSM", icon: "🗺️" },
-    { id: "geoportal_orto", label: "Satelita", icon: "🛰️" },
-    { id: "geoportal_topo", label: "Topo", icon: "🏔️" },
-    { id: "terrain", label: "Teren / wysokości", icon: "🌄" },
-  ];
+  const toggleMapLayer = (key: MapLayerKey) => {
+    if (key === "areas") setShowAreasLayer(v => !v);
+    if (key === "taskGraphics") setShowTaskGraphics(v => !v);
+    if (key === "tracks") setShowTracks(v => !v);
+    if (key === "grid") setShowGrid(v => !v);
+    if (key === "threat") setShowHeatmap3d(v => !v);
+  };
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen();
+  };
 
   return (
     <div className="app-layout">
       {/* ── Top navigation bar ── */}
-      <nav className="top-nav">
-        <div className="top-nav-brand">
-          <BrainCircuit size={18} />
-          <span>AICOMMAND</span>
+      <nav className="ac-nav">
+        <div className="ac-brand">
+          <ShieldChevron size={19} weight="fill" />
+          <span className="ac-brand-name">AICOMMAND</span>
+          <span className="ac-brand-ver">v2</span>
         </div>
-        <div className="top-nav-divider" />
-        <button className={`top-nav-tab ${sidebarTab === "units" ? "active" : ""}`} onClick={() => { setSidebarTab("units"); setComparisonMode(false); }}>Jednostki</button>
-        <button className={`top-nav-tab ${sidebarTab === "simulation" ? "active" : ""}`} onClick={() => { setSidebarTab("simulation"); setComparisonMode(false); }}>Symulacja</button>
-        <button
-          className={`top-nav-tab ${sidebarTab === "alerts" ? "active" : ""}`}
-          onClick={() => { setSidebarTab("alerts"); setComparisonMode(false); }}
-          style={activeEngagementUnitIds.size > 0 ? { color: "#f87171" } : undefined}
-        >
-          {activeEngagementUnitIds.size > 0 ? `⚔ Starcia (${activeEngagementsState.length})` : "Starcia"}
-        </button>
-        <button className={`top-nav-tab ${sidebarTab === "comparison" ? "active" : ""}`} onClick={() => { setSidebarTab("comparison"); setComparisonMode(true); }}>Porównaj</button>
-        <button
-          className={`top-nav-tab ${sidebarTab === "monitoring" ? "active" : ""}`}
-          onClick={() => { setSidebarTab("monitoring"); setComparisonMode(false); }}
-          style={isDetecting ? { color: sidebarTab === "monitoring" ? undefined : "#4ade80" } : undefined}
-        >
-          {isDetecting ? "⬤ Monitoring" : "Monitoring"}
-        </button>
+        <div className="ac-nav-divider" />
+
+        <div className="ac-nav-tabs">
+          {NAV_TABS.map(t => (
+            <button
+              key={t.id}
+              className={`ac-nav-tab${sidebarTab === t.id ? " active" : ""}`}
+              onClick={() => { setSidebarTab(t.id); setComparisonMode(t.id === "comparison"); }}
+            >
+              <t.Icon size={15} /><span>{t.label}</span>
+              {/* Licznik jako znacznik, nie przemalowanie zakładki — czerwień
+                  zostaje zarezerwowana dla strony przeciwnika. */}
+              {t.id === "alerts" && activeEngagementUnitIds.size > 0 && (
+                <span className="ac-nav-badge">{activeEngagementsState.length}</span>
+              )}
+              {t.id === "monitoring" && isDetecting && (
+                <span className="ac-nav-dot" title="Detekcja aktywna" />
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="ac-nav-spacer" />
+
+        <div className="ac-nav-right">
+          <div className="ac-clock">
+            <span className="ac-clock-label">Czas misji</span>
+            <span className="ac-clock-value">{formatMissionClock(missionClockSec)}</span>
+          </div>
+
+          <div className="ac-simctl">
+            <button
+              className={`ac-sim-btn${simRunning ? " running" : ""}`}
+              onClick={() => (simRunning ? stopSimulation() : startSimulation())}
+              title="Start / stop symulacji"
+            >
+              {simRunning ? <Pause size={14} /> : <Play size={14} />}
+              {simRunning ? "Pauza" : "Start"}
+            </button>
+            <div className="ac-seg">
+              {[1, 8, 20, 60].map(v => (
+                <button
+                  key={v}
+                  className={`ac-seg-btn mono${timeScale === v ? " active" : ""}`}
+                  onClick={() => setTimeScale(v)}
+                  title={`Tempo symulacji ×${v}`}
+                >
+                  ×{v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
       </nav>
 
       {/* ── Body ── */}
       <div className="app-body">
       {/* ── Sidebar ── */}
-      <aside className={`sidebar${leftCollapsed ? " collapsed" : ""}`}>
-        <div className="sidebar-content">
+      <aside
+        className={
+          AC_LEFT_TABS.has(sidebarTab)
+            ? `ac-left${leftCollapsed ? " collapsed" : ""}`
+            : `sidebar${leftCollapsed ? " collapsed" : ""}`
+        }
+      >
+        <div className={AC_LEFT_TABS.has(sidebarTab) ? "ac-left-inner" : "sidebar-content"}>
           {sidebarTab === "units" && (
             <UnitsListPanel
               units={units}
@@ -1031,108 +1139,127 @@ export default function App() {
                 if (u) mapHandleRef.current?.flyTo([u.x, u.y], 17);
               }}
               onToggleExpand={toggleUnitExpanded}
-              showAreasLayer={showAreasLayer}
-              isHierarchicalZoom={isHierarchicalZoom}
-              visibleEchelons={visibleEchelons}
-              onToggleAreasLayer={() => setShowAreasLayer(v => !v)}
-              onToggleHierarchicalZoom={() => setIsHierarchicalZoom(v => !v)}
-              onToggleEchelon={toggleEchelon}
-              onApplyEchelonPreset={applyEchelonPreset}
+              onAddUnit={() => {
+                // Otwarte z panelu bocznego — domyślnie geometryczny środek Polski.
+                setPlacementDialog({ lonLat: [19.48, 52.07] });
+              }}
+              onCollapse={() => setLeftCollapsed(true)}
             />
           )}
 
           {sidebarTab === "simulation" && (
             <SimulationPanel
+              units={units}
               simRunning={simRunning}
-              hasRoutes={hasRoutes}
-              simSpeedKmh={simSpeedKmh}
+              timeScale={timeScale}
               isDetecting={isDetecting}
-              isSimulationEnabled={isSimulationEnabled}
-              isSimulationRunning={isSimulationRunning}
-              selectedUnitId={selectedUnitId}
-              onStartSimulation={startSimulation}
-              onStopSimulation={stopSimulation}
-              onSpeedChange={setSimSpeedKmh}
-              onToggleDetecting={() => setIsDetecting(v => !v)}
-              onToggleSimulationEnabled={() => {
-                setIsSimulationEnabled(v => !v);
-                if (isSimulationEnabled) simStopAuto();
+              onToggleSim={() => (simRunning ? stopSimulation() : startSimulation())}
+              onStepMinutes={stepMinutes}
+              onReset={() => {
+                stopSimulation();
+                resetMissionClock();
+                setMarkers([]);
+                void refreshState();
+                void refreshAreas();
               }}
-              onRefreshState={refreshState}
-              onStepSelected={simStepSelected}
-              onStepAll={simStepAll}
-              onRunRules={simRunRules}
-              onSimStartAuto={simStartAuto}
-              onSimStopAuto={simStopAuto}
+              onToggleDetecting={() => setIsDetecting(v => !v)}
+              onTimeScale={setTimeScale}
+              onCollapse={() => setLeftCollapsed(true)}
             />
           )}
 
           {sidebarTab === "alerts" && (
-            <EngagementPanel
+            <AcEngagementsPanel
               engagements={activeEngagementsState}
               units={units}
-              unitTerrainClassRef={unitTerrainClassRef}
+              terrainByUnitId={unitTerrainClassRef.current}
+              terrainProfiles={unitTerrainProfileRef.current}
+              onCollapse={() => setLeftCollapsed(true)}
+              onFocusUnit={id => {
+                setSelectedUnitId(id);
+                const u = units.find(x => x.id === id);
+                if (u) mapHandleRef.current?.flyTo([u.x, u.y], 15);
+              }}
             />
           )}
 
           {sidebarTab === "comparison" && (
-            <CombatPotentialPanel
+            <AcComparePanel
               units={units}
-              unitAreas={unitAreas}
-              markers={markers}
-              comparisonOwnUnitIds={comparisonOwnUnitIds}
-              comparisonTargetUnitIds={comparisonTargetUnitIds}
-              setComparisonOwnUnitIds={setComparisonOwnUnitIds}
-              setComparisonTargetUnitIds={setComparisonTargetUnitIds}
-              unitTerrainClassRef={unitTerrainClassRef}
-              unitTerrainModifiersRef={unitTerrainModifiersRef}
-              checkTerrainForUnit={checkTerrainForUnit}
-              checkTerrainForUnitArea={checkTerrainForUnitArea}
+              terrainByUnitId={unitTerrainClassRef.current}
+              terrainProfiles={unitTerrainProfileRef.current}
+              onCollapse={() => setLeftCollapsed(true)}
+              onSelectUnit={id => {
+                setSelectedUnitId(id);
+                const u = units.find(x => x.id === id);
+                if (u) mapHandleRef.current?.flyTo([u.x, u.y], 15);
+              }}
             />
           )}
 
           {sidebarTab === "monitoring" && (
-            <DetectionPanel
+            <AcMonitoringPanel
               detections={detections}
+              isDetecting={isDetecting}
               inferenceMs={inferenceMs}
-              isActive={isDetecting}
-              sidebar
-              onSaveDetection={handleYoloSave}
+              onCollapse={() => setLeftCollapsed(true)}
             />
           )}
         </div>
       </aside>
 
-      {/* ── Left sidebar toggle ── */}
-      <button
-        className="panel-edge-btn left-btn"
-        style={{ left: leftCollapsed ? 0 : 380 }}
-        onClick={() => setLeftCollapsed(v => !v)}
-        title={leftCollapsed ? "Pokaż panel boczny" : "Ukryj panel boczny"}
-      >
-        {leftCollapsed ? "›" : "‹"}
-      </button>
+      {/* ── Przywrócenie lewego panelu ──
+          Zwijanie odbywa się przyciskiem « w nagłówku panelu; po zwinięciu
+          zostaje tylko wiszący przycisk », który panel przywraca. */}
+      {leftCollapsed && (
+        <button
+          className="panel-edge-btn left-btn ac-reopen-btn"
+          onClick={() => setLeftCollapsed(false)}
+          title="Pokaż panel boczny"
+        >
+          <CaretDoubleRight size={14} />
+        </button>
+      )}
 
       {/* ── Map ── */}
-      <main className="map-area">
+      {/* --rail-right cofa prawą kolumnę narzędzi przed panel jednostki, aby
+          nakładki nigdy nie chowały się pod nim. Jedna zmienna zamiast
+          powtarzanego offsetu przy każdej nakładce. */}
+      <main
+        className="map-area"
+        style={{ ["--rail-right" as string]: selectedUnit && !rightPanelCollapsed ? "364px" : "12px" }}
+      >
+        {/* Marker mapy składa pozycję z `units` (aktualizowaną co tick) z trasą
+            i grafiką zadania z `markers`. Wcześniej `task` był tu pomijany, więc
+            przełącznik grafiki APP-6A nie miał żadnego wpływu na rysowanie. */}
         <ScenarioMapView
           ref={mapHandleRef}
-          markers={visibleUnits.map(u => ({
-            id: u.id,
-            symbolId: u.symbol_id,
-            x: u.x,
-            y: u.y,
-            route: markers.find(m => m.id === u.id)?.route || [],
-            destroyed: isUnitDestroyed(u),
-          }))}
+          markers={visibleUnits.map(u => {
+            const m = markers.find(x => x.id === u.id);
+            return {
+              id: u.id,
+              symbolId: u.symbol_id,
+              x: u.x,
+              y: u.y,
+              route: m?.route || [],
+              task: m?.task,
+              destroyed: isUnitDestroyed(u),
+              side: u.side,
+              label: unitShortLabel(u),
+            };
+          })}
           selectedMarkerId={selectedUnitId}
           mode={mode}
           baseLayer={baseLayer}
           detections={detections}
           simTracks={fullState?.tracks ?? []}
+          trails={recording}
           simAssessments={fullState?.assessments ?? []}
           unitPositions={unitPositions}
           showAreas={showAreasLayer}
+          showTaskGraphics={showTaskGraphics}
+          showTracks={showTracks}
+          showGrid={showGrid}
           unitAreas={visibleUnitAreas}
           suggestedRoutes={suggestedRouteSegments}
           refreshAreasTrigger={refreshAreasTrigger}
@@ -1164,25 +1291,37 @@ export default function App() {
           />
         )}
 
-        {/* ── Przełącznik 2D / 3D + podkład ── */}
-        <div className="view-mode-switch"
-             style={{ right: selectedUnit && !rightPanelCollapsed ? 356 : 16 }}>
-          <button className={`vms-btn${!view3d ? " active" : ""}`} onClick={() => setView3d(false)}>2D</button>
-          <button className={`vms-btn${view3d ? " active" : ""}`} onClick={() => setView3d(true)}>3D</button>
-          {view3d && (
-            <>
-              <select className="vms-select" value={basemap3d}
-                      onChange={e => setBasemap3d(e.target.value as Basemap)} title="Podkład mapy 3D">
-                <option value="osm">OSM</option>
-                <option value="bing">Satelita (Bing)</option>
-                <option value="google">Satelita (Google)</option>
-                <option value="photo3d">Fotorealistyczny 3D</option>
-              </select>
-              <button className={`vms-btn${showHeatmap3d ? " active" : ""}`}
-                      onClick={() => setShowHeatmap3d(v => !v)} title="Heatmapa zagrożenia">🔥</button>
-            </>
-          )}
-        </div>
+        {/* ── Prawa kolumna narzędzi: 2D/3D, warstwy i podkład, zoom ── */}
+        <MapToolRail
+          view3d={view3d}
+          onView3dChange={setView3d}
+          layers={{
+            areas: showAreasLayer,
+            taskGraphics: showTaskGraphics,
+            tracks: showTracks,
+            grid: showGrid,
+            threat: showHeatmap3d,
+          }}
+          onToggleLayer={toggleMapLayer}
+          layerHints={{
+            taskGraphics: markers.some(m => m.route.length > 0) ? undefined : "Brak narysowanych tras",
+            tracks: recording || (fullState?.tracks?.length ?? 0) > 0
+              ? undefined
+              : "Pojawią się po uruchomieniu symulacji",
+          }}
+          baseLayer={baseLayer}
+          onBaseLayerChange={setBaseLayer}
+          basemap3d={basemap3d}
+          onBasemap3dChange={setBasemap3d}
+          isHierarchicalZoom={isHierarchicalZoom}
+          onToggleHierarchicalZoom={() => setIsHierarchicalZoom(v => !v)}
+          visibleEchelons={visibleEchelons}
+          onToggleEchelon={toggleEchelon}
+          onEchelonPreset={applyEchelonPreset}
+          onZoomIn={() => mapHandleRef.current?.zoomBy(1)}
+          onZoomOut={() => mapHandleRef.current?.zoomBy(-1)}
+          onToggleFullscreen={toggleFullscreen}
+        />
 
         {/* Draw Subordinate Area Instructions */}
         {mode === "draw-subordinate-area" && (
@@ -1201,7 +1340,7 @@ export default function App() {
                     value={subordinateUnitNumber}
                     onChange={e => setSubordinateUnitNumber(e.target.value)}
                     placeholder="Numer"
-                    style={{ width: "80px", background: "#1e293b", color: "#fff", border: "1px solid #334155", borderRadius: "6px", padding: "8px" }}
+                    style={{ width: "80px", background: "var(--bg-sunken)", color: "var(--text-primary)", border: "1px solid var(--border-strong)", borderRadius: "6px", padding: "8px" }}
                   />
                   <input
                     type="text"
@@ -1209,7 +1348,7 @@ export default function App() {
                     value={subordinateCustomName}
                     onChange={e => setSubordinateCustomName(e.target.value)}
                     placeholder="Nazwa własna"
-                    style={{ flex: 1, background: "#1e293b", color: "#fff", border: "1px solid #334155", borderRadius: "6px", padding: "8px" }}
+                    style={{ flex: 1, background: "var(--bg-sunken)", color: "var(--text-primary)", border: "1px solid var(--border-strong)", borderRadius: "6px", padding: "8px" }}
                   />
                 </div>
                 <div className="draw-area-actions" style={{ marginTop: "12px" }}>
@@ -1251,9 +1390,19 @@ export default function App() {
         )}
 
         {/* Placement Dialog */}
+        {placementDialog?.picking && (
+          <div className="placement-pick-hint">
+            Kliknij na mapie, aby wskazać położenie nowej jednostki
+            <span>Esc — powrót</span>
+          </div>
+        )}
         {placementDialog && (
           <UnitPlacementDialog
             lonLat={placementDialog.lonLat}
+            units={units}
+            hierarchy={fullState?.hierarchy ?? []}
+            hidden={placementDialog.picking}
+            onPickLocation={() => setPlacementDialog(prev => (prev ? { ...prev, picking: true } : prev))}
             onClose={() => setPlacementDialog(null)}
             onConfirm={newUnit => {
               setUnits(prev => [...prev, newUnit]);
@@ -1338,33 +1487,6 @@ export default function App() {
           <div className="ai-control-disclaimer">
             Model abstrakcyjny — polityka symulacyjna, nie realne doradztwo taktyczne.
           </div>
-        </div>
-
-        <div className="map-layer-switcher">
-          <button
-            className="map-layer-toggle-btn"
-            onClick={() => setLayerMenuOpen(!layerMenuOpen)}
-            title="Podkład mapowy"
-          >
-            <span className="layer-icon">🌍</span>
-            <span className="layer-chevron">{layerMenuOpen ? "▾" : "▸"}</span>
-          </button>
-          {layerMenuOpen && (
-            <div className="map-layer-dropdown">
-              <div className="map-layer-dropdown-title">Podkład mapowy</div>
-              {BASE_LAYERS.map(bl => (
-                <button
-                  key={bl.id}
-                  className={`map-layer-option ${baseLayer === bl.id ? "active" : ""}`}
-                  onClick={() => { setBaseLayer(bl.id); setLayerMenuOpen(false); }}
-                >
-                  <span className="option-icon">{bl.icon}</span>
-                  <span className="option-label">{bl.label}</span>
-                  {baseLayer === bl.id && <span className="option-check">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* Logistics Form Overlay */}
@@ -1569,6 +1691,24 @@ export default function App() {
               onCheckTerrain={id => void checkTerrainForUnit(id)}
               onCheckTerrainArea={id => void checkTerrainForUnitArea(id)}
               onSelectUnit={setSelectedUnitId}
+              markers={markers}
+              terrainClass={unitTerrainClassRef.current.get(selectedUnit.id)}
+              terrainProfile={unitTerrainProfileRef.current.get(selectedUnit.id)}
+              inContact={activeEngagementUnitIds.has(selectedUnit.id)}
+              isHidden={hiddenUnitIds.has(selectedUnit.id)}
+              onCenterUnit={id => {
+                const u = unitsRef.current.find(x => x.id === id);
+                if (u) mapHandleRef.current?.flyTo([u.x, u.y]);
+              }}
+              onToggleHide={toggleUnitVisibility}
+              onDrawArea={startDrawAreaForUnit}
+              onSetRouteTask={(id, task) =>
+                setMarkers(prev => prev.map(m => m.id === id ? { ...m, task } : m))}
+              onLogisticsSaved={newLogistics => {
+                setUnits(prev => prev.map(u =>
+                  u.id === selectedUnit.id ? { ...u, logistics: newLogistics } : u));
+                void refreshState();
+              }}
             />
           </div>
         </aside>

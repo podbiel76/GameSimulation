@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from .database import engine, Base
-from .routes import units, detect, scenario, hierarchy, geojson, map_routes, logistics, terrain
+from .routes import units, detect, scenario, hierarchy, geojson, map_routes, logistics, terrain, terrain_profile
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -32,6 +32,7 @@ app.include_router(geojson.router, prefix="/api")
 app.include_router(map_routes.router, prefix="")
 app.include_router(logistics.router, prefix="")
 app.include_router(terrain.router, prefix="")
+app.include_router(terrain_profile.router, prefix="/api")
 
 @app.get("/")
 def root():

@@ -60,27 +60,27 @@ function resolveDecision(ratio: number): Decision {
   if (ratio > 1.8) return {
     action: "NATARCIE",
     subtitle: "Zdecydowana przewaga własna",
-    color: "#4ade80", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.4)", icon: "⚔️",
+    color: "var(--ok-light)", bg: "var(--ok-tint)", border: "rgba(134,176,106,0.45)", icon: "⚔️",
   };
   if (ratio > 1.2) return {
     action: "NATARCIE",
     subtitle: "Przewaga własna",
-    color: "#86efac", bg: "rgba(74,222,128,0.08)", border: "rgba(74,222,128,0.3)", icon: "⚔️",
+    color: "var(--ok-light)", bg: "var(--ok-tint)", border: "rgba(134,176,106,0.35)", icon: "⚔️",
   };
   if (ratio >= 0.8) return {
     action: "WSTRZYMANIE",
     subtitle: "Względna równowaga sił",
-    color: "#fbbf24", bg: "rgba(251,191,36,0.10)", border: "rgba(251,191,36,0.35)", icon: "⏸",
+    color: "var(--accent)", bg: "var(--accent-tint)", border: "var(--accent-line)", icon: "⏸",
   };
   if (ratio >= 0.5) return {
     action: "OBRONA",
     subtitle: "Przewaga przeciwnika",
-    color: "#fb923c", bg: "rgba(251,146,60,0.10)", border: "rgba(251,146,60,0.35)", icon: "🛡",
+    color: "var(--accent-deep)", bg: "var(--accent-tint)", border: "var(--accent-line)", icon: "🛡",
   };
   return {
     action: "ODWRÓT",
     subtitle: "Zdecydowana przewaga przeciwnika",
-    color: "#f87171", bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.4)", icon: "↩",
+    color: "var(--side-hostile-light)", bg: "var(--side-hostile-tint)", border: "rgba(217,99,90,0.4)", icon: "↩",
   };
 }
 
@@ -134,14 +134,14 @@ function DecisionBox({ ratio, ownEff, targetEff }: { ratio: number; ownEff: numb
           <div style={{ fontSize: 12, color: d.color, opacity: 0.85 }}>{d.subtitle}</div>
         </div>
         <div style={{ marginLeft: "auto", textAlign: "right" }}>
-          <div style={{ fontSize: 10, color: "#64748b" }}>stosunek sił</div>
+          <div style={{ fontSize: 10, color: "var(--text-dim)" }}>stosunek sił</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: d.color }}>{ratio.toFixed(2)}</div>
         </div>
       </div>
 
       {/* Mini pasek sił */}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", marginBottom: 3 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>
           <span>Jednostki sojusznicze: {(ownEff * 100).toFixed(1)}</span>
           <span>Jednostki wrogie: {(targetEff * 100).toFixed(1)}</span>
         </div>
@@ -151,15 +151,15 @@ function DecisionBox({ ratio, ownEff, targetEff }: { ratio: number; ownEff: numb
             const ownW = total > 0 ? (ownEff / total) * 100 : 50;
             return (
               <>
-                <div style={{ width: `${ownW}%`, background: "#3b82f6", borderRadius: "5px 0 0 5px", transition: "width 0.4s" }} />
-                <div style={{ flex: 1, background: "#ef4444", borderRadius: "0 5px 5px 0" }} />
+                <div style={{ width: `${ownW}%`, background: "var(--side-friendly)", borderRadius: "5px 0 0 5px", transition: "width 0.4s" }} />
+                <div style={{ flex: 1, background: "var(--side-hostile)", borderRadius: "0 5px 5px 0" }} />
               </>
             );
           })()}
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#64748b", marginTop: 2 }}>
-          <span style={{ color: "#60a5fa" }}>■ własne</span>
-          <span style={{ color: "#f87171" }}>■ wskazane</span>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-dim)", marginTop: 2 }}>
+          <span style={{ color: "var(--side-friendly)" }}>■ własne</span>
+          <span style={{ color: "var(--side-hostile-light)" }}>■ wskazane</span>
         </div>
       </div>
     </div>
@@ -175,9 +175,9 @@ const ROLE_LABEL: Record<CombatRole, string> = {
 // ─── Custom role dropdown ────────────────────────────────────────────────────
 
 const ROLE_OPTIONS: Array<{ value: CombatRole; label: string; icon: string; badge: string; color: string }> = [
-  { value: "attacker", label: "Atakujący", icon: "✕", badge: "+ATK", color: "#ef4444" },
-  { value: "defender", label: "Broniący",  icon: "⬡", badge: "+DEF", color: "#3b82f6" },
-  { value: "neutral",  label: "Neutralny", icon: "—", badge: "BASE", color: "#64748b" },
+  { value: "attacker", label: "Atakujący", icon: "✕", badge: "+ATK", color: "var(--side-hostile)" },
+  { value: "defender", label: "Broniący",  icon: "⬡", badge: "+DEF", color: "var(--side-friendly)" },
+  { value: "neutral",  label: "Neutralny", icon: "—", badge: "BASE", color: "var(--text-dim)" },
 ];
 
 function RoleDropdown({ value, onChange }: { value: CombatRole; onChange: (v: CombatRole) => void }) {
@@ -202,23 +202,23 @@ function RoleDropdown({ value, onChange }: { value: CombatRole; onChange: (v: Co
         onClick={() => setOpen(v => !v)}
         style={{
           display: "flex", alignItems: "center", gap: 6,
-          background: open ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.05)",
-          border: `1px solid ${open ? "rgba(56,139,253,0.55)" : "rgba(255,255,255,0.14)"}`,
+          background: open ? "var(--side-friendly-tint)" : "rgba(255,255,255,0.05)",
+          border: `1px solid ${open ? "var(--accent-tint)" : "rgba(255,255,255,0.14)"}`,
           borderRadius: 7, padding: "5px 9px 5px 8px",
           cursor: "pointer", fontSize: 12, fontWeight: 700,
-          color: "#e2e8f0", minWidth: 120, whiteSpace: "nowrap",
+          color: "var(--text-primary)", minWidth: 120, whiteSpace: "nowrap",
         }}
       >
         <span style={{ color: current.color, fontSize: 13, lineHeight: 1 }}>{current.icon}</span>
         <span style={{ flex: 1 }}>{current.label}</span>
-        <span style={{ color: "#4a5568", fontSize: 9, marginLeft: 2 }}>{open ? "▲" : "▼"}</span>
+        <span style={{ color: "var(--border-hover)", fontSize: 9, marginLeft: 2 }}>{open ? "▲" : "▼"}</span>
       </button>
 
       {/* Menu */}
       {open && (
         <div style={{
           position: "absolute", top: "calc(100% + 5px)", right: 0, zIndex: 300,
-          background: "#0f172a", border: "1px solid rgba(255,255,255,0.12)",
+          background: "var(--bg-secondary)", border: "1px solid rgba(255,255,255,0.12)",
           borderRadius: 9, padding: 4, minWidth: 168,
           boxShadow: "0 12px 40px rgba(0,0,0,0.7)",
         }}>
@@ -232,9 +232,9 @@ function RoleDropdown({ value, onChange }: { value: CombatRole; onChange: (v: Co
                 style={{
                   display: "flex", alignItems: "center", gap: 8,
                   width: "100%", padding: "7px 10px",
-                  background: sel ? "rgba(37,99,235,0.18)" : "transparent",
+                  background: sel ? "var(--side-friendly-tint)" : "transparent",
                   border: "none", borderRadius: 6, cursor: "pointer",
-                  color: sel ? "#93c5fd" : "#94a3b8",
+                  color: sel ? "var(--side-friendly)" : "var(--text-muted)",
                   fontSize: 13, fontWeight: 600, textAlign: "left",
                 }}
               >
@@ -242,10 +242,10 @@ function RoleDropdown({ value, onChange }: { value: CombatRole; onChange: (v: Co
                 <span style={{ flex: 1 }}>{opt.label}</span>
                 <span style={{
                   fontSize: 10, fontWeight: 700, fontFamily: "monospace",
-                  color: "#475569", background: "rgba(255,255,255,0.06)",
+                  color: "var(--border-hover)", background: "rgba(255,255,255,0.06)",
                   borderRadius: 4, padding: "1px 5px",
                 }}>{opt.badge}</span>
-                {sel && <span style={{ color: "#3b82f6", fontSize: 13, marginLeft: 2 }}>✓</span>}
+                {sel && <span style={{ color: "var(--side-friendly)", fontSize: 13, marginLeft: 2 }}>✓</span>}
               </button>
             );
           })}
@@ -269,7 +269,7 @@ function ReasonBox({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
         Uzasadnienie
       </div>
 
@@ -278,21 +278,21 @@ function ReasonBox({
         display: "flex", gap: 6, flexWrap: "wrap",
         background: "rgba(255,255,255,0.03)", borderRadius: 6, padding: "6px 8px",
       }}>
-        <div style={{ fontSize: 11, color: "#64748b", width: "100%", marginBottom: 2 }}>Modyfikator terenu × rola:</div>
+        <div style={{ fontSize: 11, color: "var(--text-dim)", width: "100%", marginBottom: 2 }}>Modyfikator terenu × rola:</div>
         <div style={{ display: "flex", justifyContent: "space-between", width: "100%", gap: 8 }}>
           <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 10, color: "#60a5fa" }}>Jednostki sojusznicze: </span>
+            <span style={{ fontSize: 10, color: "var(--side-friendly)" }}>Jednostki sojusznicze: </span>
             <span style={{
               fontSize: 13, fontWeight: 800,
-              color: ownTerrainAvg > 1.05 ? "#4ade80" : ownTerrainAvg < 0.8 ? "#f87171" : "#94a3b8",
+              color: ownTerrainAvg > 1.05 ? "var(--ok-light)" : ownTerrainAvg < 0.8 ? "var(--side-hostile-light)" : "var(--text-muted)",
             }}>×{ownTerrainAvg.toFixed(2)}</span>
             
           </div>
           <div style={{ flex: 1, textAlign: "right" }}>
-            <span style={{ fontSize: 10, color: "#f87171" }}>Jednostki wrogie: </span>
+            <span style={{ fontSize: 10, color: "var(--side-hostile-light)" }}>Jednostki wrogie: </span>
             <span style={{
               fontSize: 13, fontWeight: 800,
-              color: targetTerrainAvg > 1.05 ? "#4ade80" : targetTerrainAvg < 0.8 ? "#f87171" : "#94a3b8",
+              color: targetTerrainAvg > 1.05 ? "var(--ok-light)" : targetTerrainAvg < 0.8 ? "var(--side-hostile-light)" : "var(--text-muted)",
             }}>×{targetTerrainAvg.toFixed(2)}</span>
             
           </div>
@@ -301,25 +301,25 @@ function ReasonBox({
 
       {ownStrong && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
-          <span style={{ color: "#22c55e", fontSize: 14 }}>↑</span>
-          <span style={{ color: "#94a3b8" }}>Najsilniejsza kategoria własna:</span>
-          <span style={{ color: "#e2e8f0", fontWeight: 700 }}>{ownStrong.label}</span>
+          <span style={{ color: "var(--ok)", fontSize: 14 }}>↑</span>
+          <span style={{ color: "var(--text-muted)" }}>Najsilniejsza kategoria własna:</span>
+          <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{ownStrong.label}</span>
         </div>
       )}
 
       {ownWeak && ownWeak.value < 0.7 && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
-          <span style={{ color: "#f59e0b", fontSize: 14 }}>⚠</span>
-          <span style={{ color: "#94a3b8" }}>Słaby punkt własny:</span>
-          <span style={{ color: "#fbbf24", fontWeight: 700 }}>{ownWeak.label} ({pct(ownWeak.value)})</span>
+          <span style={{ color: "var(--accent)", fontSize: 14 }}>⚠</span>
+          <span style={{ color: "var(--text-muted)" }}>Słaby punkt własny:</span>
+          <span style={{ color: "var(--accent)", fontWeight: 700 }}>{ownWeak.label} ({pct(ownWeak.value)})</span>
         </div>
       )}
 
       {tgtWeak && tgtWeak.value < 0.7 && (
         <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11 }}>
-          <span style={{ color: "#60a5fa", fontSize: 14 }}>↓</span>
-          <span style={{ color: "#94a3b8" }}>Słaby punkt przeciwnika:</span>
-          <span style={{ color: "#60a5fa", fontWeight: 700 }}>{tgtWeak.label} ({pct(tgtWeak.value)})</span>
+          <span style={{ color: "var(--side-friendly)", fontSize: 14 }}>↓</span>
+          <span style={{ color: "var(--text-muted)" }}>Słaby punkt przeciwnika:</span>
+          <span style={{ color: "var(--side-friendly)", fontWeight: 700 }}>{tgtWeak.label} ({pct(tgtWeak.value)})</span>
         </div>
       )}
     </div>
@@ -331,8 +331,8 @@ function CategoryBar({ ownVal, targetVal }: { ownVal: number; targetVal: number 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3, width: "100%" }}>
       {[
-        { val: ownVal,    color: "#3b82f6", label: (ownVal * 100).toFixed(0) },
-        { val: targetVal, color: "#ef4444", label: (targetVal * 100).toFixed(0) },
+        { val: ownVal,    color: "var(--side-friendly)", label: (ownVal * 100).toFixed(0) },
+        { val: targetVal, color: "var(--side-hostile)", label: (targetVal * 100).toFixed(0) },
       ].map(({ val, color, label }, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ width: 24, fontSize: 10, color, textAlign: "right" }}>{label}</span>
@@ -348,15 +348,15 @@ function CategoryBar({ ownVal, targetVal }: { ownVal: number; targetVal: number 
 function ModifierTable({ ownUnits, targetUnits }: { ownUnits: UnitPotentialResult[]; targetUnits: UnitPotentialResult[] }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
+      <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 6 }}>
         Modyfikatory (śr. jednostki)
       </div>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
         <thead>
           <tr>
-            <th style={{ textAlign: "left", color: "#475569", fontWeight: 500, paddingBottom: 4 }}>Modyfikator</th>
-            <th style={{ textAlign: "right", color: "#60a5fa", fontWeight: 500, paddingBottom: 4 }}>Jednostki sojusznicze:</th>
-            <th style={{ textAlign: "right", color: "#f87171", fontWeight: 500, paddingBottom: 4 }}>Jednostki wrogie:</th>
+            <th style={{ textAlign: "left", color: "var(--border-hover)", fontWeight: 500, paddingBottom: 4 }}>Modyfikator</th>
+            <th style={{ textAlign: "right", color: "var(--side-friendly)", fontWeight: 500, paddingBottom: 4 }}>Jednostki sojusznicze:</th>
+            <th style={{ textAlign: "right", color: "var(--side-hostile-light)", fontWeight: 500, paddingBottom: 4 }}>Jednostki wrogie:</th>
           </tr>
         </thead>
         <tbody>
@@ -366,11 +366,11 @@ function ModifierTable({ ownUnits, targetUnits }: { ownUnits: UnitPotentialResul
             const isLow = ov < 0.5;
             return (
               <tr key={mk} style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                <td style={{ color: isLow ? "#fbbf24" : "#94a3b8", padding: "3px 0" }}>
+                <td style={{ color: isLow ? "var(--accent)" : "var(--text-muted)", padding: "3px 0" }}>
                   {isLow && <span style={{ marginRight: 4 }}>⚠</span>}{label}
                 </td>
-                <td style={{ textAlign: "right", color: "#60a5fa", padding: "3px 4px" }}>{pct(ov)}</td>
-                <td style={{ textAlign: "right", color: "#f87171", padding: "3px 0" }}>{pct(tv)}</td>
+                <td style={{ textAlign: "right", color: "var(--side-friendly)", padding: "3px 4px" }}>{pct(ov)}</td>
+                <td style={{ textAlign: "right", color: "var(--side-hostile-light)", padding: "3px 0" }}>{pct(tv)}</td>
               </tr>
             );
           })}
@@ -385,9 +385,9 @@ function EngagementSection({ result }: { result: PotentialComparisonResult }) {
   const pred = result.engagementPrediction;
   if (!pred) return null;
 
-  const winColor = pred.predictedWinner === "own" ? "#22c55e"
-    : pred.predictedWinner === "draw" ? "#fbbf24"
-    : "#f87171";
+  const winColor = pred.predictedWinner === "own" ? "var(--ok)"
+    : pred.predictedWinner === "draw" ? "var(--accent)"
+    : "var(--side-hostile-light)";
   const winLabel = pred.predictedWinner === "own" ? "Jednostki sojusznicze"
     : pred.predictedWinner === "draw" ? "Remis"
     : "Jednostki wrogie";
@@ -399,7 +399,7 @@ function EngagementSection({ result }: { result: PotentialComparisonResult }) {
         style={{
           width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
           background: "rgba(255,255,255,0.03)", border: "none", cursor: "pointer",
-          padding: "8px 12px", color: "#94a3b8", fontSize: 12, fontWeight: 600,
+          padding: "8px 12px", color: "var(--text-muted)", fontSize: 12, fontWeight: 600,
         }}
       >
         <span>Predykcja starcia (Lanchester)</span>
@@ -411,15 +411,15 @@ function EngagementSection({ result }: { result: PotentialComparisonResult }) {
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { label: "Zwycięzca", value: winLabel, color: winColor },
-              { label: "Czas starcia", value: `${pred.estimatedEngagementTimeMinutes} min`, color: "#94a3b8" },
+              { label: "Czas starcia", value: `${pred.estimatedEngagementTimeMinutes} min`, color: "var(--text-muted)" },
               { label: "Ufność modelu", value: `${(pred.confidence * 100).toFixed(0)}%`,
-                color: pred.confidence >= 0.7 ? "#22c55e" : pred.confidence >= 0.4 ? "#fbbf24" : "#f87171" },
+                color: pred.confidence >= 0.7 ? "var(--ok)" : pred.confidence >= 0.4 ? "var(--accent)" : "var(--side-hostile-light)" },
             ].map(({ label, value, color }) => (
               <div key={label} style={{
                 flex: 1, textAlign: "center",
                 background: "rgba(255,255,255,0.04)", borderRadius: 6, padding: "6px 4px",
               }}>
-                <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>{label}</div>
+                <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>{label}</div>
                 <div style={{ fontSize: 15, fontWeight: 800, color }}>{value}</div>
               </div>
             ))}
@@ -427,14 +427,14 @@ function EngagementSection({ result }: { result: PotentialComparisonResult }) {
 
           <div style={{ display: "flex", gap: 8 }}>
             {[
-              { label: "Jednostki sojusznicze: — pozostałe", value: pred.ownRemainingPercent, color: "#60a5fa" },
-              { label: "Jednostki wrogie — pozostałe", value: pred.targetRemainingPercent, color: "#f87171" },
+              { label: "Jednostki sojusznicze: — pozostałe", value: pred.ownRemainingPercent, color: "var(--side-friendly)" },
+              { label: "Jednostki wrogie — pozostałe", value: pred.targetRemainingPercent, color: "var(--side-hostile-light)" },
             ].map(({ label, value, color }) => (
               <div key={label} style={{
                 flex: 1, textAlign: "center",
                 background: "rgba(255,255,255,0.03)", borderRadius: 6, padding: "6px 4px",
               }}>
-                <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>{label}</div>
+                <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>{label}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color }}>{value}%</div>
               </div>
             ))}
@@ -442,7 +442,7 @@ function EngagementSection({ result }: { result: PotentialComparisonResult }) {
 
           <div style={{
             background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.18)",
-            borderRadius: 5, padding: "5px 9px", fontSize: 10, color: "#92400e", lineHeight: 1.4,
+            borderRadius: 5, padding: "5px 9px", fontSize: 10, color: "var(--accent-tint)", lineHeight: 1.4,
           }}>
             ⚠ Model heurystyczny — nie jest prognozą realną. Wyłącznie abstrakcyjna miara symulacyjna.
           </div>
@@ -471,10 +471,10 @@ function ContactSection({ contact }: { contact: ContactPrediction }) {
       display: "flex", flexDirection: "column", gap: 8,
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+        <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
           Czas do kontaktu
         </div>
-        <div title="Szacunek heurystyczny — nie uwzględnia zmiany terenu ani manewrów" style={{ fontSize: 10, color: "#475569", cursor: "help" }}>ℹ</div>
+        <div title="Szacunek heurystyczny — nie uwzględnia zmiany terenu ani manewrów" style={{ fontSize: 10, color: "var(--border-hover)", cursor: "help" }}>ℹ</div>
       </div>
 
       <div style={{ display: "flex", gap: 6 }}>
@@ -482,8 +482,8 @@ function ContactSection({ contact }: { contact: ContactPrediction }) {
           flex: 1, textAlign: "center",
           background: "rgba(255,255,255,0.04)", borderRadius: 6, padding: "6px 4px",
         }}>
-          <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>Odległość</div>
-          <div style={{ fontSize: 14, fontWeight: 800, color: "#94a3b8" }}>
+          <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>Odległość</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "var(--text-muted)" }}>
             {contact.currentDistanceKm < 1
               ? `${(contact.currentDistanceKm * 1000).toFixed(0)} m`
               : `${contact.currentDistanceKm.toFixed(1)} km`}
@@ -494,10 +494,10 @@ function ContactSection({ contact }: { contact: ContactPrediction }) {
           flex: 1, textAlign: "center",
           background: "rgba(255,255,255,0.04)", borderRadius: 6, padding: "6px 4px",
         }}>
-          <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>Zbliżanie</div>
+          <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>Zbliżanie</div>
           <div style={{
             fontSize: 14, fontWeight: 800,
-            color: isConverging ? "#4ade80" : contact.closingSpeedKmh < -0.5 ? "#f87171" : "#94a3b8",
+            color: isConverging ? "var(--ok-light)" : contact.closingSpeedKmh < -0.5 ? "var(--side-hostile-light)" : "var(--text-muted)",
           }}>
             {isConverging
               ? `${contact.closingSpeedKmh.toFixed(0)} km/h`
@@ -513,13 +513,13 @@ function ContactSection({ contact }: { contact: ContactPrediction }) {
           border: hasContact ? "1px solid rgba(251,191,36,0.2)" : "none",
           borderRadius: 6, padding: "6px 4px",
         }}>
-          <div style={{ fontSize: 10, color: "#64748b", marginBottom: 3 }}>Kontakt</div>
+          <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 3 }}>Kontakt</div>
           {hasContact ? (
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#fbbf24" }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "var(--accent)" }}>
               {formatContactTime(contact.timeToContactMinutes!)}
             </div>
           ) : (
-            <div style={{ fontSize: 11, color: "#475569" }}>
+            <div style={{ fontSize: 11, color: "var(--border-hover)" }}>
               {contact.timeToContactMinutes === 0 ? "teraz" : "brak"}
             </div>
           )}
@@ -527,12 +527,12 @@ function ContactSection({ contact }: { contact: ContactPrediction }) {
       </div>
 
       {!isConverging && !hasContact && (
-        <div style={{ fontSize: 10, color: "#475569", textAlign: "center" }}>
+        <div style={{ fontSize: 10, color: "var(--border-hover)", textAlign: "center" }}>
           Jednostki nie zbliżają się lub nie mają przypisanych tras
         </div>
       )}
 
-      <div style={{ fontSize: 10, color: "#475569", fontStyle: "italic" }}>
+      <div style={{ fontSize: 10, color: "var(--border-hover)", fontStyle: "italic" }}>
         ⚠ Szacunek heurystyczny — nie uwzględnia zmiany terenu ani manewrów
       </div>
     </div>
@@ -559,14 +559,14 @@ function ResultsSection({ result, contact }: { result: PotentialComparisonResult
 
       {/* 4. Kategorie */}
       <div>
-        <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--text-dim)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 8 }}>
           Porównanie kategorii
-          <span style={{ marginLeft: 8, fontSize: 10, color: "#475569" }}>■ własne &nbsp; ■ wskazane</span>
+          <span style={{ marginLeft: 8, fontSize: 10, color: "var(--border-hover)" }}>■ własne &nbsp; ■ wskazane</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {cats.map(cat => (
             <div key={cat} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ width: 76, fontSize: 11, color: "#94a3b8", flexShrink: 0 }}>{CATEGORY_LABELS[cat]}</span>
+              <span style={{ width: 76, fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>{CATEGORY_LABELS[cat]}</span>
               <CategoryBar
                 ownVal={result.categoryComparison[cat].own}
                 targetVal={result.categoryComparison[cat].target}
@@ -664,8 +664,8 @@ export default function CombatPotentialPanel({
 
   const terrainBadge = (unitId: string) => {
     const raw = unitTerrainClassRef.current.get(unitId);
-    if (!raw) return <span style={{ fontSize: 10, color: "#475569", marginLeft: 4 }}>brak analizy</span>;
-    return <span style={{ fontSize: 10, color: "#fbbf24", marginLeft: 4 }}>{raw}</span>;
+    if (!raw) return <span style={{ fontSize: 10, color: "var(--border-hover)", marginLeft: 4 }}>brak analizy</span>;
+    return <span style={{ fontSize: 10, color: "var(--accent)", marginLeft: 4 }}>{raw}</span>;
   };
 
   const friendlyUnits = units.filter(u => u.side === "friendly");
@@ -680,9 +680,9 @@ export default function CombatPotentialPanel({
     }}>
       <input type="checkbox" checked={checked} onChange={onChange}
         style={{ accentColor: color, cursor: "pointer", flexShrink: 0 }} />
-      <span style={{ fontSize: 11, color: checked ? "#e2e8f0" : "#94a3b8", lineHeight: 1.3, flex: 1 }}>
+      <span style={{ fontSize: 11, color: checked ? "var(--text-primary)" : "var(--text-muted)", lineHeight: 1.3, flex: 1 }}>
         {u.custom_name || u.symbol_name}
-        {u.echelon && <span style={{ color: "#475569", marginLeft: 4 }}>{u.echelon.replace(/_/g, " ")}</span>}
+        {u.echelon && <span style={{ color: "var(--border-hover)", marginLeft: 4 }}>{u.echelon.replace(/_/g, " ")}</span>}
       </span>
       {checked && terrainBadge(u.id)}
     </label>
@@ -710,7 +710,7 @@ export default function CombatPotentialPanel({
           onClick={() => { setComparisonOwnUnitIds([]); setComparisonTargetUnitIds([]); }}
           style={{
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-            borderRadius: 4, padding: "3px 8px", color: "#94a3b8", fontSize: 11, cursor: "pointer",
+            borderRadius: 4, padding: "3px 8px", color: "var(--text-muted)", fontSize: 11, cursor: "pointer",
           }}
         >Wyczyść</button>
       </div>
@@ -718,15 +718,15 @@ export default function CombatPotentialPanel({
       {/* sojusznicze jednostki */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 600 }}>
+          <div style={{ fontSize: 11, color: "var(--side-friendly)", fontWeight: 600 }}>
             Jednostki sojusznicze ({comparisonOwnUnitIds.length})
           </div>
           <RoleDropdown value={ownRole} onChange={setOwnRole} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 3, maxHeight: 150, overflowY: "auto" }}>
-          {friendlyUnits.length > 0 && <div style={{ fontSize: 10, color: "#475569", padding: "2px 6px" }}></div>}
-          {friendlyUnits.map(u => unitRow(u, comparisonOwnUnitIds.includes(u.id), () => toggle(comparisonOwnUnitIds, setComparisonOwnUnitIds, u.id), "#3b82f6"))}
-          {units.length === 0 && <div style={{ fontSize: 11, color: "#475569", padding: "4px 6px" }}>Brak jednostek</div>}
+          {friendlyUnits.length > 0 && <div style={{ fontSize: 10, color: "var(--border-hover)", padding: "2px 6px" }}></div>}
+          {friendlyUnits.map(u => unitRow(u, comparisonOwnUnitIds.includes(u.id), () => toggle(comparisonOwnUnitIds, setComparisonOwnUnitIds, u.id), "var(--side-friendly)"))}
+          {units.length === 0 && <div style={{ fontSize: 11, color: "var(--border-hover)", padding: "4px 6px" }}>Brak jednostek</div>}
         </div>
       </div>
 
@@ -735,15 +735,15 @@ export default function CombatPotentialPanel({
       {/* wrogie jednostki */}
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-          <div style={{ fontSize: 11, color: "#f87171", fontWeight: 600 }}>
+          <div style={{ fontSize: 11, color: "var(--side-hostile-light)", fontWeight: 600 }}>
             Jednostki wrogie ({comparisonTargetUnitIds.length})
           </div>
           <RoleDropdown value={targetRole} onChange={setTargetRole} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 3, maxHeight: 150, overflowY: "auto" }}>
-          {hostileUnits.length > 0 && <div style={{ fontSize: 10, color: "#475569", padding: "2px 6px" }}></div>}
-          {hostileUnits.map(u => unitRow(u, comparisonTargetUnitIds.includes(u.id), () => toggle(comparisonTargetUnitIds, setComparisonTargetUnitIds, u.id), "#ef4444"))}
-          {units.length === 0 && <div style={{ fontSize: 11, color: "#475569", padding: "4px 6px" }}>Brak jednostek</div>}
+          {hostileUnits.length > 0 && <div style={{ fontSize: 10, color: "var(--border-hover)", padding: "2px 6px" }}></div>}
+          {hostileUnits.map(u => unitRow(u, comparisonTargetUnitIds.includes(u.id), () => toggle(comparisonTargetUnitIds, setComparisonTargetUnitIds, u.id), "var(--side-hostile)"))}
+          {units.length === 0 && <div style={{ fontSize: 11, color: "var(--border-hover)", padding: "4px 6px" }}>Brak jednostek</div>}
         </div>
       </div>
 
@@ -755,7 +755,7 @@ export default function CombatPotentialPanel({
         </>
       ) : (
         <div style={{
-          textAlign: "center", padding: "18px 8px", fontSize: 12, color: "#475569",
+          textAlign: "center", padding: "18px 8px", fontSize: 12, color: "var(--border-hover)",
           border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 8,
         }}>
           Wybierz co najmniej jedną jednostkę z każdej strony, aby zobaczyć porównanie i decyzję taktyczną.

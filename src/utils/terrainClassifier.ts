@@ -1,3 +1,5 @@
+import { SIM_DEBUG } from './debug';
+
 export const TERRAIN_ANALYSIS_ZOOM = 16;
 
 export type TerrainClass = 'forest' | 'water' | 'wetland' | 'urban' | 'road' | 'open';
@@ -76,7 +78,9 @@ export async function classifyTerrainFromCanvas(
   cx: number,
   cy: number,
   windowSize = 64,
-  debug = true,
+  // Domyślnie wyłączone: console.table ×2 na każde wywołanie było liczone także wtedy,
+  // gdy nikt nie patrzył na konsolę. Wywołania z pętli symulacji i tak przekazywały false.
+  debug = SIM_DEBUG,
 ): Promise<TerrainResult | null> {
   try {
     const binary = atob(imageBase64);
@@ -150,6 +154,9 @@ export async function classifyTerrainFromCanvas(
 
     const totalPixels = cropW * cropH;
 
+    // Statystyki kolorów (sumy HSL + kubełki) służą WYŁĄCZNIE do wydruku diagnostycznego.
+    // Poza trybem debug pomijamy je: to drugie wywołanie rgbToHsl, alokacja stringa
+    // i operacja na Map — na każdy piksel.
     for (let i = 0; i < data.length; i += 4) {
       const alpha = data[i + 3];
 
@@ -161,6 +168,8 @@ export async function classifyTerrainFromCanvas(
 
       const terrainClass = classifyPixelColor(r, g, b);
       counts[terrainClass]++;
+
+      if (!debug) continue;
 
       const [h, s, l] = rgbToHsl(r, g, b);
 
@@ -181,35 +190,35 @@ export async function classifyTerrainFromCanvas(
     const dominantCount = terrain === 'wetland' ? counts.water : counts[terrain as PixelClass];
     const confidence = round2(dominantCount / totalPixels);
 
-    const classStats = (Object.keys(counts) as PixelClass[]).map((key) => ({
-      terrain: key,
-      pixels: counts[key],
-      percent: round2((counts[key] / totalPixels) * 100),
-    }));
-
-    const avgR = Math.round(rSum / totalPixels);
-    const avgG = Math.round(gSum / totalPixels);
-    const avgB = Math.round(bSum / totalPixels);
-    const avgH = round2(hSum / totalPixels);
-    const avgS = round2(sSum / totalPixels);
-    const avgL = round2(lSum / totalPixels);
-
-    const topColors: ColorBucketInfo[] = [...colorBuckets.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([key, count]) => {
-        const [r, g, b] = key.split(',').map(Number);
-        const [h, s, l] = rgbToHsl(r, g, b);
-        return {
-          rgb: `rgb(${r}, ${g}, ${b})`,
-          count,
-          percent: round2((count / totalPixels) * 100),
-          terrain: classifyPixelColor(r, g, b),
-          hsl: `hsl(${round2(h)}, ${round2(s)}%, ${round2(l)}%)`,
-        };
-      });
-
     if (debug) {
+      const classStats = (Object.keys(counts) as PixelClass[]).map((key) => ({
+        terrain: key,
+        pixels: counts[key],
+        percent: round2((counts[key] / totalPixels) * 100),
+      }));
+
+      const avgR = Math.round(rSum / totalPixels);
+      const avgG = Math.round(gSum / totalPixels);
+      const avgB = Math.round(bSum / totalPixels);
+      const avgH = round2(hSum / totalPixels);
+      const avgS = round2(sSum / totalPixels);
+      const avgL = round2(lSum / totalPixels);
+
+      const topColors: ColorBucketInfo[] = [...colorBuckets.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12)
+        .map(([key, count]) => {
+          const [r, g, b] = key.split(',').map(Number);
+          const [h, s, l] = rgbToHsl(r, g, b);
+          return {
+            rgb: `rgb(${r}, ${g}, ${b})`,
+            count,
+            percent: round2((count / totalPixels) * 100),
+            terrain: classifyPixelColor(r, g, b),
+            hsl: `hsl(${round2(h)}, ${round2(s)}%, ${round2(l)}%)`,
+          };
+        });
+
       console.groupCollapsed(
         `[TERRAIN] terrain=${terrain}, confidence=${confidence}, pixels=${totalPixels}`,
       );

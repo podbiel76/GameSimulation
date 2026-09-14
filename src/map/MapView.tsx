@@ -20,6 +20,7 @@ import Fill from "ol/style/Fill";
 import Text from "ol/style/Text";
 import CircleStyle from "ol/style/Circle";
 import { ScaleLine, defaults as defaultControls } from "ol/control";
+import Graticule from "ol/layer/Graticule";
 import { Modify, Snap, defaults as defaultInteractions } from "ol/interaction";
 import GeoJSON from "ol/format/GeoJSON";
 
@@ -33,14 +34,36 @@ import {
   shouldShowAreaAtZoom,
 } from "../utils/hierarchyVisibility";
 import { unitAreaStyleFunction } from "./unitAreaStyles";
+import { buildAxisOfAdvance, buildDirectionOfAttack } from "./taskGraphics";
+import { sideRgb } from "../utils/unitLabel";
+
+/** Skróty zadań w podpisie trasy (makieta: TASK_ABBR). */
+const TASK_ABBR: Record<string, string> = { adv: "OŚ NAT.", atk: "KIER. NAT.", mvt: "MARSZ" };
+
+/** Podpis w ramce w kolorze strony — trasy i AO. */
+function boxedLabel(text: string, rgb: string, extra: Partial<ConstructorParameters<typeof Text>[0]> = {}) {
+  return new Text({
+    text,
+    font: '600 11px "JetBrains Mono", ui-monospace, monospace',
+    fill: new Fill({ color: `rgb(${rgb})` }),
+    backgroundFill: new Fill({ color: "rgba(14, 16, 18, 0.88)" }),
+    backgroundStroke: new Stroke({ color: `rgba(${rgb}, 0.9)`, width: 1 }),
+    padding: [3, 6, 2, 6],
+    overflow: true,
+    ...extra,
+  });
+}
 import { buildRotatedSquareGeoJson } from "../utils/geoUtils";
-import type { ScenarioMarker, EditorMode, MapDetection } from "../types/map";
+import type { ScenarioMarker, EditorMode, MapDetection, BaseLayerType } from "../types/map";
 import type { SimUnitTrack, SimAssessment } from "../types/simulation";
 
 import "ol/ol.css";
 import "../index.css";
 import { altKeyOnly, singleClick } from "ol/events/condition";
-export type BaseLayerType = "osm" | "geoportal_orto" | "geoportal_topo" | "terrain";
+
+// Kanoniczna definicja przeniesiona do types/map.ts (była zdublowana
+// w martwym components/MapView.tsx). Re-eksport, żeby nie ruszać importów w App.tsx.
+export type { BaseLayerType } from "../types/map";
 
 type Props = {
   markers: ScenarioMarker[];
@@ -56,6 +79,14 @@ type Props = {
   suggestedRoutes?: [number, number][][];   // odcinki [[fromX,fromY],[toX,toY]] — doradczo
   refreshAreasTrigger?: number;
   isHierarchicalZoom?: boolean;
+  /** Trasy, groty i punkty zwrotu (grafiki zadań APP-6A). */
+  showTaskGraphics?: boolean;
+  /** Ślady ruchu z symulacji. */
+  showTracks?: boolean;
+  /** Siatka współrzędnych. */
+  showGrid?: boolean;
+  /** Zapis przebiegu symulacji lokalnej ([tMs, lon, lat] na jednostkę) — ślady ruchu. */
+  trails?: { byId: Record<string, [number, number, number][]> } | null;
   onMapClick: (coord: [number, number]) => void;
   onPointerMove: (coord: [number, number]) => void;
   onMarkerClick: (
@@ -104,6 +135,8 @@ export type MapViewHandle = {
     pixelCoords: [number, number][]; dpr: number;
   } | null;
   flyTo: (coord3857: [number, number], zoom?: number) => void;
+  /** Zmiana zoomu o `delta` poziomów (przyciski w kolumnie narzędzi). */
+  zoomBy: (delta: number) => void;
 };
 
 const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
@@ -120,6 +153,10 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
   unitAreas = [],
   refreshAreasTrigger = 0,
   isHierarchicalZoom = false,
+  showTaskGraphics = true,
+  showTracks = true,
+  showGrid = false,
+  trails = null,
   isLocked = false,
   onMapClick,
   onPointerMove,
@@ -162,6 +199,7 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
   const terrainBoxLayerRef = useRef<VectorLayer | null>(null);
   const suggestLayerRef = useRef<VectorLayer | null>(null);
   const markerLayerRef = useRef<VectorLayer | null>(null);
+  const graticuleLayerRef = useRef<Graticule | null>(null);
   const onPointerMoveRef = useRef(onPointerMove);
   onPointerMoveRef.current = onPointerMove;
   const onMapClickRef = useRef(onMapClick);
@@ -175,6 +213,11 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
 
   // Expose methods to parent
   useImperativeHandle(ref, () => ({
+    zoomBy: (delta: number) => {
+      const view = mapRef.current?.getView();
+      const zoom = view?.getZoom();
+      if (view && zoom != null) view.animate({ zoom: zoom + delta, duration: 200 });
+    },
     captureCanvas: () => {
       if (!mapRef.current) return null;
       const canvas = mapElRef.current?.querySelector("canvas");
@@ -460,10 +503,34 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
     });
     areaDraftLayerRef.current = areaDraftLayer;
 
+    // Siatka współrzędnych z etykietami — ciemna linia, widoczna na jasnych
+    // podkładach (OSM, Topo, Teren), gdzie szara półprzezroczysta ginęła.
+    const graticuleLayer = new Graticule({
+      strokeStyle: new Stroke({ color: "rgba(25, 35, 45, 0.55)", width: 1.2, lineDash: [6, 4] }),
+      showLabels: true,
+      lonLabelStyle: new Text({
+        font: '600 11px "JetBrains Mono", ui-monospace, monospace',
+        textBaseline: "bottom",
+        fill: new Fill({ color: "#1b232b" }),
+        stroke: new Stroke({ color: "rgba(255, 255, 255, 0.85)", width: 3 }),
+      }),
+      latLabelStyle: new Text({
+        font: '600 11px "JetBrains Mono", ui-monospace, monospace',
+        textAlign: "end",
+        fill: new Fill({ color: "#1b232b" }),
+        stroke: new Stroke({ color: "rgba(255, 255, 255, 0.85)", width: 3 }),
+      }),
+      wrapX: false,
+      zIndex: 2,
+      visible: false,
+    });
+    graticuleLayerRef.current = graticuleLayer;
+
     const map = new Map({
       target: mapElRef.current,
       layers: [
         defaultBaseLayer,
+        graticuleLayer,
         areaLayer,
         areaLabelLayer,
         trackLayer,
@@ -483,7 +550,9 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
         zoom: 7,
         enableRotation: false,
       }),
+      // Zoom obsługuje prawa kolumna narzędzi (MapToolRail) — domyślny wisiał na przełączniku 2D/3D.
       controls: defaultControls({
+        zoom: false,
         attributionOptions: { collapsible: true },
       }).extend([
         new ScaleLine({
@@ -618,6 +687,20 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
           source: new OSM(),
           zIndex: 0,
         });
+      } else if (baseLayer === "dark") {
+        // CARTO Dark Matter — jedyny darmowy podkład bez klucza API, który
+        // odpowiada palecie grafitowej (#0b0c0d). Wymagana atrybucja CARTO + OSM.
+        // Uwaga licencyjna: darmowy tier CARTO jest niekomercyjny — przy wdrożeniu
+        // u odbiorcy zweryfikować warunki albo postawić własny serwer kafelków.
+        newLayer = new TileLayer({
+          source: new XYZ({
+            url: "https://{a-d}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            attributions:
+              '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attributions">CARTO</a>',
+            maxZoom: 20,
+          }),
+          zIndex: 0,
+        });
       } else if (baseLayer === "terrain") {
         newLayer = new TileLayer({
           source: new XYZ({
@@ -735,13 +818,90 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
           ...sorted.map((rp): [number, number] => [rp.x, rp.y]),
         ];
 
-        const lineFeature = new Feature({
-          geometry: new LineString(routeCoords),
-        });
-        routeSource.addFeature(lineFeature);
+        // Grafika zadania APP-6A. Rozmiary podane w pikselach i przeliczone
+        // przez rozdzielczość widoku, żeby grubość strzałki nie zmieniała się
+        // przy zoomowaniu (geometria OL żyje w metrach EPSG:3857).
+        const task = m.task ?? "mvt";
+        const res = mapRef.current?.getView().getResolution() ?? 1;
+        const rgb = sideRgb(m.side);
+        const routeStroke = `rgba(${rgb}, 0.95)`;
+
+        if (task === "adv") {
+          // Oś natarcia — zamknięty obrys strzałki, bez wypełnienia.
+          const ring = buildAxisOfAdvance(routeCoords, {
+            halfWidth: 7 * res,
+            headLength: 34 * res,
+            headHalfWidth: 17 * res,
+          });
+          if (ring) {
+            const f = new Feature({ geometry: new LineString(ring) });
+            f.setStyle(new Style({
+              stroke: new Stroke({ color: routeStroke, width: 2, lineJoin: "round" }),
+            }));
+            routeSource.addFeature(f);
+          }
+        } else if (task === "atk") {
+          // Kierunek natarcia — linia trasy plus PEŁNY grot na końcu.
+          // Makieta rysuje go z `fill`, więc tu wielokąt z wypełnieniem,
+          // w odróżnieniu od osi natarcia, która jest samym obrysem.
+          const built = buildDirectionOfAttack(routeCoords, {
+            headLength: 30 * res,
+            headHalfWidth: 13 * res,
+          });
+          if (built) {
+            const lineF = new Feature({ geometry: new LineString(built.line) });
+            lineF.setStyle(new Style({
+              stroke: new Stroke({ color: routeStroke, width: 3, lineCap: "round", lineJoin: "round" }),
+            }));
+            routeSource.addFeature(lineF);
+
+            const headF = new Feature({ geometry: new Polygon([built.head]) });
+            headF.setStyle(new Style({
+              fill: new Fill({ color: routeStroke }),
+              stroke: new Stroke({ color: routeStroke, width: 1, lineJoin: "round" }),
+            }));
+            routeSource.addFeature(headF);
+          }
+        } else {
+          // Marsz / trasa — linia przerywana. Styl na obiekcie ma pierwszeństwo
+          // przed `routeLineStyle` warstwy, więc kreskowanie podajemy jawnie.
+          const lineFeature = new Feature({ geometry: new LineString(routeCoords) });
+          lineFeature.setStyle(new Style({
+            stroke: new Stroke({
+              color: routeStroke,
+              width: 3,
+              lineDash: [10, 6],
+              lineCap: "round",
+              lineJoin: "round",
+            }),
+          }));
+          routeSource.addFeature(lineFeature);
+        }
+
+        // Podpis trasy: zadanie · jednostka. Kotwica na początku ostatniego
+        // odcinka (przy zakręcie przed grotem); przy jednym odcinku — w połowie.
+        if (m.label) {
+          const n = routeCoords.length;
+          const anchor: [number, number] = n > 2
+            ? routeCoords[n - 2]
+            : [(routeCoords[0][0] + routeCoords[1][0]) / 2, (routeCoords[0][1] + routeCoords[1][1]) / 2];
+          const labelF = new Feature({ geometry: new Point(anchor) });
+          labelF.setStyle(new Style({
+            text: boxedLabel(`${TASK_ABBR[task] ?? ""} · ${m.label}`, rgb, {
+              textAlign: "left",
+              offsetX: 12,
+              offsetY: -14,
+            }),
+          }));
+          routeArrowSource.addFeature(labelF);
+        }
+
+        // Groty pośrednie tylko przy marszu — „adv" i „atk" mają jeden grot,
+        // zbudowany geometrycznie powyżej.
+        const drawSegmentArrows = task === "mvt";
 
         // Directional arrows at segment midpoints
-        for (let i = 0; i < routeCoords.length - 1; i++) {
+        for (let i = 0; drawSegmentArrows && i < routeCoords.length - 1; i++) {
           const [ax, ay] = routeCoords[i];
           const [bx, by] = routeCoords[i + 1];
           const midX = (ax + bx) / 2;
@@ -753,7 +913,7 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
             text: new Text({
               text: "▲",
               font: "bold 14px sans-serif",
-              fill: new Fill({ color: "rgba(16, 185, 129, 0.95)" }),
+              fill: new Fill({ color: routeStroke }),
               stroke: new Stroke({ color: "#ffffff", width: 2 }),
               rotation,
               rotateWithView: false,
@@ -770,7 +930,7 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
             new Style({
               image: new CircleStyle({
                 radius: 9,
-                fill: new Fill({ color: "rgba(16, 185, 129, 0.9)" }),
+                fill: new Fill({ color: `rgba(${rgb}, 0.9)` }),
                 stroke: new Stroke({ color: "#ffffff", width: 2 }),
               }),
             }),
@@ -788,6 +948,21 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
       }
     }
   }, [markers, selectedMarkerId, currentZoom, isHierarchicalZoom]);
+
+  // ── Widoczność warstw z panelu warstw ──
+  // Podczas rysowania trasy grafiki zadań zostają widoczne, inaczej nie widać edytowanej trasy.
+  useEffect(() => {
+    const taskVisible = showTaskGraphics || mode === "draw-route";
+    routeLayerRef.current?.setVisible(taskVisible);
+    routeArrowLayerRef.current?.setVisible(taskVisible);
+    routePointLayerRef.current?.setVisible(taskVisible);
+    trackLayerRef.current?.setVisible(showTracks);
+    graticuleLayerRef.current?.setVisible(showGrid);
+  }, [showTaskGraphics, showTracks, showGrid, mode]);
+
+  // Strona i podpis jednostek dla AO — klucz tekstowy, żeby tablica `markers`
+  // (nowa przy każdym renderze App) nie przerysowywała obszarów bez potrzeby.
+  const markerInfoKey = markers.map(m => `${m.id}:${m.side ?? ""}:${m.label ?? ""}:${m.destroyed ? 1 : 0}`).join("|");
 
   // ── "Duch" rekomendowanych tras (tryb doradczy) ──
   useEffect(() => {
@@ -855,7 +1030,26 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
         src.addFeature(dotFeat);
       }
     }
-  }, [simTracks]);
+
+    // Ślady ruchu z lokalnej symulacji (rejestrator przebiegu) — w kolorze strony.
+    // Backend zapisuje tracki tylko dla symulacji serwerowej, więc bez tego warstwa była pusta.
+    const sideById: Record<string, string | undefined> = {};
+    for (const m of markers) sideById[m.id] = m.side;
+    for (const [unitId, samples] of Object.entries(trails?.byId ?? {})) {
+      if (samples.length < 2) continue;
+      const step = Math.max(1, Math.ceil(samples.length / 500));
+      const coords = samples
+        .filter((_, i) => i % step === 0 || i === samples.length - 1)
+        .map(([, lon, lat]) => fromLonLat([lon, lat]));
+      const rgb = sideRgb(sideById[unitId]);
+      const trailFeat = new Feature({ geometry: new LineString(coords) });
+      trailFeat.setStyle(new Style({
+        stroke: new Stroke({ color: `rgba(${rgb}, 0.8)`, width: 2.5, lineDash: [2, 6], lineCap: "round" }),
+      }));
+      src.addFeature(trailFeat);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `markers` śledzony przez markerInfoKey
+  }, [simTracks, trails, markerInfoKey]);
 
   // ── Sync Simulation Assessments ──
   useEffect(() => {
@@ -912,11 +1106,11 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
         const projected = (a.coordinates as [number, number][]).map(p => fromLonLat(p) as [number, number]);
         const feat = new Feature({ geometry: new Polygon([projected]) });
 
-        const side = (a as any).unit_side as string | undefined;
-        const isDestroyed = (a as any).unit_destroyed === true;
-        const isFriendly = side === "friendly";
+        const owner = markers.find(m => m.id === a.unit_id);
+        const side = ((a as any).unit_side as string | undefined) ?? owner?.side;
+        const isDestroyed = (a as any).unit_destroyed === true || owner?.destroyed === true;
         // Jednostka niezdolna do walki → szary obszar (niezależnie od strony).
-        const rgb = isDestroyed ? "107, 114, 128" : (isFriendly ? "59, 130, 246" : "239, 68, 68");
+        const rgb = sideRgb(side, isDestroyed);
         const fillAlpha = isSelected ? 0.25 : 0.15;
         const strokeAlpha = isDestroyed ? 0.5 : (isSelected ? 0.9 : 0.65);
 
@@ -931,39 +1125,20 @@ const ScenarioMapView = forwardRef<MapViewHandle, Props>(({
 
         src.addFeature(feat);
 
-        // Edge labels — only at zoom >= 17, only on edges long enough to display text
-        if (currentZoom >= 17 && a.name) {
-          const labelText = a.name;
-          const labelColor = `rgba(${rgb}, 1)`;
-          const n = projected.length;
-          // Minimum edge length in EPSG:3857 meters — prevents stacking near vertices
-          const MIN_EDGE_LEN = 200;
-          for (let i = 0; i < n; i++) {
-            const p0 = projected[i];
-            const p1 = projected[(i + 1) % n];
-            const dx = p1[0] - p0[0];
-            const dy = p1[1] - p0[1];
-            const len = Math.sqrt(dx * dx + dy * dy);
-            if (len < MIN_EDGE_LEN) continue;
-            const edgeFeat = new Feature({
-              geometry: new LineString([p0, p1]),
-            });
-            edgeFeat.setStyle(new Style({
-              text: new Text({
-                placement: "line" as any,
-                text: labelText,
-                font: 'bold 11px "Inter", sans-serif',
-                fill: new Fill({ color: labelColor }),
-                stroke: new Stroke({ color: "#ffffff", width: 3 }),
-                overflow: true,
-              }),
-            }));
-            labelSrc.addFeature(edgeFeat);
-          }
+        // Podpis AO w ramce nad najwyżej położonym wierzchołkiem obszaru.
+        const labelText = owner?.label ? `AO ${owner.label}` : a.name;
+        if (labelText) {
+          const top = projected.reduce((best, p) => (p[1] > best[1] ? p : best), projected[0]);
+          const labelFeat = new Feature({ geometry: new Point(top) });
+          labelFeat.setStyle(new Style({
+            text: boxedLabel(labelText, rgb, { offsetY: -14 }),
+          }));
+          labelSrc.addFeature(labelFeat);
         }
       });
     }
-  }, [unitAreas, showAreas, currentZoom, isHierarchicalZoom, selectedMarkerId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `markers` śledzony przez markerInfoKey
+  }, [unitAreas, showAreas, currentZoom, isHierarchicalZoom, selectedMarkerId, markerInfoKey]);
 
   // ── Sync Area Draft ──
   useEffect(() => {

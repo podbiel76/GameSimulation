@@ -115,15 +115,53 @@ function segmentIntersects(
   return t >= 0 && t <= 1 && u >= 0 && u <= 1;
 }
 
+/** Axis-aligned bounding box: [minX, minY, maxX, maxY]. */
+export type Bbox = [number, number, number, number];
+
+/**
+ * Computes the AABB of a polygon. O(n).
+ *
+ * Deliberately derived from the live coordinates instead of the `bbox` column
+ * returned by the backend — during simulation the polygons are translated
+ * client-side and the persisted bbox goes stale until the next PATCH.
+ */
+export function computeBbox(poly: [number, number][]): Bbox {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of poly) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  }
+  return [minX, minY, maxX, maxY];
+}
+
+/** Cheap separating-axis reject on two AABBs. Touching boxes count as overlapping. */
+export function bboxesOverlap(a: Bbox, b: Bbox): boolean {
+  return !(a[2] < b[0] || b[2] < a[0] || a[3] < b[1] || b[3] < a[1]);
+}
+
 /**
  * Returns true if two polygons (arrays of [lon,lat] points) overlap or touch.
  * Handles: A inside B, B inside A, partial overlap, and cross-intersection.
+ *
+ * Callers that test one polygon against many should precompute the AABBs and
+ * gate on `bboxesOverlap` first — that turns the O(F×H) pairwise sweep into a
+ * cheap reject for the (overwhelmingly common) disjoint case. The internal
+ * check below is a safety net for callers that don't.
  */
 export function polygonsOverlap(
   polyA: [number, number][],
   polyB: [number, number][],
+  bboxA?: Bbox,
+  bboxB?: Bbox,
 ): boolean {
   if (polyA.length < 3 || polyB.length < 3) return false;
+
+  // Broad phase: disjoint bounding boxes ⇒ disjoint polygons.
+  if (!bboxesOverlap(bboxA ?? computeBbox(polyA), bboxB ?? computeBbox(polyB))) return false;
+
+  // Narrow phase — unchanged semantics.
   for (const pt of polyA) if (pointInPolygon(pt, polyB)) return true;
   for (const pt of polyB) if (pointInPolygon(pt, polyA)) return true;
   for (let i = 0; i < polyA.length - 1; i++) {

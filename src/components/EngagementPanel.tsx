@@ -44,7 +44,7 @@ function InfoTip({ text }: { text: string }) {
     >
       <span style={{
         width: 13, height: 13, borderRadius: "50%",
-        border: "1px solid #475569", color: "#475569",
+        border: "1px solid var(--border-hover)", color: "var(--border-hover)",
         fontSize: 8, fontWeight: 700, display: "inline-flex",
         alignItems: "center", justifyContent: "center",
         cursor: "help", lineHeight: 1, userSelect: "none",
@@ -55,12 +55,12 @@ function InfoTip({ text }: { text: string }) {
           left: pos.x,
           top: pos.y,
           transform: "translateX(-50%) translateY(-100%)",
-          background: "#1e293b",
-          border: "1px solid #334155",
+          background: "var(--bg-sunken)",
+          border: "1px solid var(--border-strong)",
           borderRadius: 7,
           padding: "8px 11px",
           fontSize: 10,
-          color: "#94a3b8",
+          color: "var(--text-muted)",
           whiteSpace: "pre-wrap",
           maxWidth: 250,
           zIndex: 9999,
@@ -89,7 +89,7 @@ function LogRow({ label, value, max, color, tip }: {
   const pct = (max != null && max > 0) ? value / max : null;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11 }}>
-      <span style={{ minWidth: 70, color: "#64748b", flexShrink: 0, display: "flex", alignItems: "center" }}>
+      <span style={{ minWidth: 70, color: "var(--text-dim)", flexShrink: 0, display: "flex", alignItems: "center" }}>
         {label}
         {tip && <InfoTip text={tip} />}
       </span>
@@ -112,7 +112,7 @@ function UnitCard({ unit, pot, lossRatePctPerSec, side }: {
   side: "friendly" | "hostile";
 }) {
   const log = unit.logistics;
-  const color = side === "friendly" ? "#60a5fa" : "#f87171";
+  const color = side === "friendly" ? "var(--side-friendly)" : "var(--side-hostile-light)";
   const ceVal = log?.combat_effectiveness_percent ?? 100;
 
   return (
@@ -123,8 +123,8 @@ function UnitCard({ unit, pot, lossRatePctPerSec, side }: {
       <div style={{ fontSize: 11, color, fontWeight: 700, marginBottom: 4, display: "flex", justifyContent: "space-between" }}>
         <span>{unit.custom_name || unit.symbol_name}</span>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 1 }}>
-          <span style={{ color: "#64748b", fontWeight: 400, fontSize: 10 }}>{unit.echelon?.replace(/_/g, " ")}</span>
-          <span style={{ color: "#334155", fontWeight: 400, fontSize: 9 }}>
+          <span style={{ color: "var(--text-dim)", fontWeight: 400, fontSize: 10 }}>{unit.echelon?.replace(/_/g, " ")}</span>
+          <span style={{ color: "var(--border-strong)", fontWeight: 400, fontSize: 9 }}>
             {classifyUnitType(unit as any) === "armor" ? "Pancerna"
               : classifyUnitType(unit as any) === "artillery" ? "Artyleria"
               : classifyUnitType(unit as any) === "anti_tank" ? "Ppanc"
@@ -135,13 +135,13 @@ function UnitCard({ unit, pot, lossRatePctPerSec, side }: {
 
       {/* CE bar */}
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-        <span style={{ fontSize: 10, color: "#64748b", minWidth: 70, display: "flex", alignItems: "center" }}>
+        <span style={{ fontSize: 10, color: "var(--text-dim)", minWidth: 70, display: "flex", alignItems: "center" }}>
           Sprawność
           <InfoTip text={"combat_effectiveness_percent z logistyki.\n\nBezpośredni mnożnik potencjału bojowego:\nCE 100% → ×1.0, CE 50% → ×0.5.\n\nSpada automatycznie w wyniku strat w trakcie starcia."} />
         </span>
         <span style={{
           fontSize: 13, fontWeight: 800,
-          color: ceVal > 70 ? "#4ade80" : ceVal > 40 ? "#fbbf24" : "#f87171",
+          color: ceVal > 70 ? "var(--ok-light)" : ceVal > 40 ? "var(--accent)" : "var(--side-hostile-light)",
         }}>{ceVal.toFixed(1)}%</span>
       </div>
 
@@ -179,13 +179,13 @@ function UnitCard({ unit, pot, lossRatePctPerSec, side }: {
       )}
 
       <div style={{ marginTop: 5, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 10 }}>
-        <span style={{ color: "#475569", display: "flex", alignItems: "center" }}>
+        <span style={{ color: "var(--border-hover)", display: "flex", alignItems: "center" }}>
           Pot. efekt. / Strata/s
           <InfoTip text={"Pot. efekt.: effectivePotential×100 tej jednostki.\n\neffectivePotential = staticPotential × CE% × maintenance × komms × paliwo × ammo\n\nStrata/s: % potencjału/s narzucony przez stronę przeciwną:\npot_wroga × 0.002 (współczynnik) × 10 (takty) × 100%."} />
         </span>
-        <span style={{ color: "#e2e8f0" }}>
+        <span style={{ color: "var(--text-primary)" }}>
           <span style={{ fontWeight: 700 }}>{(pot * 100).toFixed(1)}</span>
-          <span style={{ color: "#fbbf24", marginLeft: 6 }}>−{lossRatePctPerSec.toFixed(3)}%</span>
+          <span style={{ color: "var(--accent)", marginLeft: 6 }}>−{lossRatePctPerSec.toFixed(3)}%</span>
         </span>
       </div>
     </div>
@@ -202,11 +202,11 @@ function SideColumn({ unitIds, allUnits, terrainRef, side, opponentTotalPot, rol
   opponentTotalPot: number;
   role: "attacker" | "defender" | "neutral";
 }) {
-  const color = side === "friendly" ? "#60a5fa" : "#f87171";
+  const color = side === "friendly" ? "var(--side-friendly)" : "var(--side-hostile-light)";
   const label = side === "friendly" ? "Sojusznicy" : "Wrogowie";
   const roleBadge =
-    role === "attacker" ? { text: "⚔ Atakujący", bg: "rgba(239,68,68,0.18)", fg: "#f87171" } :
-    role === "defender" ? { text: "🛡 Broniący",  bg: "rgba(59,130,246,0.18)", fg: "#60a5fa" } :
+    role === "attacker" ? { text: "⚔ Atakujący", bg: "rgba(239,68,68,0.18)", fg: "var(--side-hostile-light)" } :
+    role === "defender" ? { text: "🛡 Broniący",  bg: "rgba(59,130,246,0.18)", fg: "var(--side-friendly)" } :
     null;
 
   const units = unitIds.map(id => allUnits.find(u => u.id === id)).filter(Boolean) as Unit[];
@@ -222,7 +222,7 @@ function SideColumn({ unitIds, allUnits, terrainRef, side, opponentTotalPot, rol
       {/* Side header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 11, fontWeight: 700, color }}>
         <span>{label}</span>
-        <span style={{ fontSize: 10, fontWeight: 400, color: "#64748b" }}>{units.length} jedn.</span>
+        <span style={{ fontSize: 10, fontWeight: 400, color: "var(--text-dim)" }}>{units.length} jedn.</span>
       </div>
 
       {/* Rola w starciu: atakujący (w ruchu) / broniący (w miejscu) */}
@@ -241,13 +241,13 @@ function SideColumn({ unitIds, allUnits, terrainRef, side, opponentTotalPot, rol
         background: `${color}11`, borderRadius: 5, padding: "4px 8px",
         border: `1px solid ${color}22`, display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
-        <span style={{ fontSize: 10, color: "#64748b", display: "flex", alignItems: "center" }}>
+        <span style={{ fontSize: 10, color: "var(--text-dim)", display: "flex", alignItems: "center" }}>
           Łączny potencjał
           <InfoTip text={"Suma effectivePotential wszystkich jednostek tej strony (×100).\n\neffectivePotential = staticPotential × CE% × maintenance × komms × paliwo × ammo\n\nstaticPotential pochodzi z etatowych wartości logistyki (personel, pojazdy, amunicja)."} />
         </span>
         <div style={{ textAlign: "right" }}>
           <span style={{ fontSize: 13, fontWeight: 800, color }}>{(totalPot * 100).toFixed(1)}</span>
-          <div style={{ fontSize: 9, color: "#fbbf24", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+          <div style={{ fontSize: 9, color: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
             −{lossRatePctPerSec.toFixed(3)}%/s każda
             <InfoTip text={"Prędkość strat narzucona przez potencjał przeciwnika na każdą jednostkę tej strony.\n\nFormula:\npot_wroga × 0.002 × 10 × 100%\n\ngdzie 0.002 = ATTRITION_COEFFICIENT\n10 = takty między obliczeniami strat."} />
           </div>
@@ -309,7 +309,7 @@ function EngagementCard({ eng, units, terrainRef }: {
   }, 0);
 
   const ratio = friendlyTotalPot / Math.max(0.0001, hostileTotalPot);
-  const ratioColor = ratio > 1.2 ? "#4ade80" : ratio < 0.8 ? "#f87171" : "#fbbf24";
+  const ratioColor = ratio > 1.2 ? "var(--ok-light)" : ratio < 0.8 ? "var(--side-hostile-light)" : "var(--accent)";
   const ratioLabel = ratio > 1.5 ? "Zdecydowana przewaga własnych"
     : ratio > 1.2 ? "Przewaga własnych"
     : ratio >= 0.8 ? "Równowaga"
@@ -329,15 +329,15 @@ function EngagementCard({ eng, units, terrainRef }: {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span style={{ fontSize: 14 }}>⚔</span>
-          <span style={{ fontSize: 12, fontWeight: 700, color: "#f87171" }}>STARCIE AKTYWNE</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--side-hostile-light)" }}>STARCIE AKTYWNE</span>
           <InfoTip text={"Starcie wykryte gdy obszar działania (AO) jednostki friendly i wrogiej nakładają się.\n\nStraty są naliczane co 10 taktów symulacji na podstawie potencjałów obu stron.\n\nModel heurystyczny — abstrakcyjna miara symulacyjna, nie prognoza bojowa."} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ fontSize: 11, color: "#64748b", display: "flex", alignItems: "center" }}>
+          <span style={{ fontSize: 11, color: "var(--text-dim)", display: "flex", alignItems: "center" }}>
             Czas trwania
             <InfoTip text={"Czas rzeczywisty (MM:SS) od momentu wykrycia starcia.\n\nStraty są naliczane cyklicznie co 10 taktów symulacji (ok. co 0.1 s czasu rzeczywistego przy normalnej prędkości)."} />
           </span>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", fontVariantNumeric: "tabular-nums" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
             {elapsed}
           </span>
         </div>
@@ -354,8 +354,8 @@ function EngagementCard({ eng, units, terrainRef }: {
           role={eng.attackerSide == null ? "neutral" : eng.attackerSide === "friendly" ? "attacker" : "defender"}
         />
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center", gap: 4, padding: "24px 2px 0" }}>
-          <span style={{ fontSize: 16, color: "#64748b" }}>↔</span>
-          <span style={{ fontSize: 10, color: "#475569" }}>vs</span>
+          <span style={{ fontSize: 16, color: "var(--text-dim)" }}>↔</span>
+          <span style={{ fontSize: 10, color: "var(--border-hover)" }}>vs</span>
         </div>
         <SideColumn
           unitIds={eng.hostileUnitIds}
@@ -373,7 +373,7 @@ function EngagementCard({ eng, units, terrainRef }: {
         background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
         display: "flex", justifyContent: "space-between", alignItems: "center",
       }}>
-        <span style={{ fontSize: 10, color: "#64748b", display: "flex", alignItems: "center" }}>
+        <span style={{ fontSize: 10, color: "var(--text-dim)", display: "flex", alignItems: "center" }}>
           Stosunek łącznych potencjałów
           <InfoTip text={"pot_własnych / pot_wroga\n\n> 1.5 → zdecydowana przewaga własnych\n1.2–1.5 → przewaga własnych\n0.8–1.2 → równowaga\n0.5–0.8 → przewaga wroga\n< 0.5 → zdecydowana przewaga wroga\n\nOparty wyłącznie na bieżących potencjałach efektywnych."} />
         </span>
@@ -391,22 +391,22 @@ function EngagementCard({ eng, units, terrainRef }: {
 export default function EngagementPanel({ engagements, units, unitTerrainClassRef }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "4px 0" }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0" }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
         Aktywne starcia
-        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: "#64748b" }}>
+        <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 400, color: "var(--text-dim)" }}>
           ({engagements.length})
         </span>
       </div>
 
       {engagements.length === 0 ? (
         <div style={{
-          textAlign: "center", padding: "24px 12px", fontSize: 12, color: "#475569",
+          textAlign: "center", padding: "24px 12px", fontSize: 12, color: "var(--border-hover)",
           border: "1px dashed rgba(255,255,255,0.08)", borderRadius: 8,
           display: "flex", flexDirection: "column", gap: 8,
         }}>
           <span style={{ fontSize: 24 }}>🕊</span>
           <span>Brak aktywnych starć.</span>
-          <span style={{ fontSize: 11, color: "#334155" }}>
+          <span style={{ fontSize: 11, color: "var(--border-strong)" }}>
             Starcie rozpoczyna się gdy AO jednostki friendly i hostile nakładają się.
           </span>
         </div>
@@ -421,7 +421,7 @@ export default function EngagementPanel({ engagements, units, unitTerrainClassRe
         ))
       )}
 
-      <div style={{ fontSize: 10, color: "#334155", textAlign: "center" }}>
+      <div style={{ fontSize: 10, color: "var(--border-strong)", textAlign: "center" }}>
         ⚠ Model heurystyczny — nie jest prognozą realną. Wyłącznie abstrakcyjna miara symulacyjna.
       </div>
     </div>

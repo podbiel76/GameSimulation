@@ -158,7 +158,7 @@ export default function LogisticsForm({ unitId, initialLogistics, onSaved, onClo
                 <span className="logi-section-hint">(wpływa na potencjał pancerny)</span>
               </div>
               {noArmor && (
-                <div style={{ padding: "4px 12px 6px", fontSize: 11, color: "#6e7681", fontStyle: "italic" }}>
+                <div style={{ padding: "4px 12px 6px", fontSize: 11, color: "var(--text-dim)", fontStyle: "italic" }}>
                   Brak pojazdów opancerzonych — amunicja niedostępna
                 </div>
               )}
@@ -205,19 +205,19 @@ export default function LogisticsForm({ unitId, initialLogistics, onSaved, onClo
                   onChange={handleNumber}
                   style={{ flex: 1 }}
                 />
-                <span style={{ width: 44, textAlign: "right", color: "#e6edf3", fontWeight: 700, fontSize: 15 }}>
+                <span style={{ width: 44, textAlign: "right", color: "var(--text-primary)", fontWeight: 700, fontSize: 15 }}>
                   {formData.combat_effectiveness_percent ?? 100}%
                 </span>
                 <button
                   type="button"
                   onClick={() => setFormData(p => ({ ...p, combat_effectiveness_percent: null }))}
                   title="Brak danych"
-                  style={{ background: "#21262d", border: "1px solid #30363d", borderRadius: 5, color: "#8b949e", fontSize: 11, padding: "3px 8px", cursor: "pointer" }}
+                  style={{ background: "var(--border-subtle)", border: "1px solid var(--border-strong)", borderRadius: 5, color: "var(--text-muted)", fontSize: 11, padding: "3px 8px", cursor: "pointer" }}
                 >
                   brak
                 </button>
               </div>
-              <div style={{ fontSize: 10, color: "#484f58", marginTop: 3 }}>
+              <div style={{ fontSize: 10, color: "var(--border-hover)", marginTop: 3 }}>
                 {formData.combat_effectiveness_percent == null
                   ? "Brak danych — model użyje wartości 100%"
                   : formData.combat_effectiveness_percent >= 80 ? "Wysoka gotowość bojowa"
@@ -231,7 +231,7 @@ export default function LogisticsForm({ unitId, initialLogistics, onSaved, onClo
         {/* NOTATKI */}
         <div className="logi-section">
           <div className="form-group-title">Notatki</div>
-          <div style={{ padding: "10px 12px", background: "#0d1117" }}>
+          <div style={{ padding: "10px 12px", background: "var(--bg-sunken)" }}>
             <textarea name="notes" value={formData.notes ?? ""} onChange={handleText} rows={2}
               style={{ width: "100%", boxSizing: "border-box", resize: "vertical" }} />
           </div>

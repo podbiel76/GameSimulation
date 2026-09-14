@@ -183,7 +183,7 @@ def create_unit(db: Session, unit: schemas.UnitCreate):
         source=unit.source,
         requires_logistics_completion=True,
         readiness_status="incomplete",
-        base_speed_kmh=choose_default_speed(unit.symbol_name)
+        base_speed_kmh=unit.base_speed_kmh or choose_default_speed(unit.symbol_name)
     )
     if db_unit.unit_number or db_unit.custom_name:
         db_unit.symbol_name = build_unit_display_name(

@@ -1,0 +1,809 @@
+/* ════════════════════════════════════════════════════════════════════════
+   AICOMMAND — lewy panel 1:1 z makietą project/AICOMMAND.dc.html
+
+   Osobna przestrzeń nazw `ac-`. Powód: klasy .sidebar / .unit-list-* /
+   .layers-* w index.css i aicommand.css niosą wartości z wcześniejszego,
+   częściowego wdrożenia. Dopasowywanie ich do makiety kończyło się tym, że
+   przy równej specyficzności wygrywał stary layout. Tutaj każda wartość jest
+   przepisana wprost z inline'owych stylów makiety — bez tokenów, bez
+   dziedziczenia, żeby dało się ją porównać jeden do jednego ze źródłem.
+
+   Odpowiedniki w makiecie podane w komentarzach przy sekcjach.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Powłoka panelu ──────────────────────────────────────────────────────
+   makieta: <aside style="width:{{leftW}} …">  leftW = 332px | 0px          */
+
+.ac-left {
+  width: 332px;
+  flex: 0 0 332px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #111315;
+  border-right: 1px solid #1e2124;
+  transition: width .26s cubic-bezier(.4, 0, .2, 1),
+              flex-basis .26s cubic-bezier(.4, 0, .2, 1);
+}
+
+.ac-left.collapsed {
+  width: 0;
+  flex-basis: 0;
+  border-right-width: 0;
+}
+
+/* Wrapper wewnątrz <aside> — panel sam zarządza przewijaniem swojego ciała,
+   więc kontener nie może wprowadzać własnego scrolla ani paddingu. */
+.ac-left-inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── Nagłówek panelu ─────────────────────────────────────────────────────
+   padding:11px 12px 10px; border-bottom:1px solid #1c1f22                  */
+
+.ac-left-head {
+  flex: 0 0 auto;
+  padding: 11px 12px 10px;
+  border-bottom: 1px solid #1c1f22;
+}
+
+.ac-left-titlerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.ac-left-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #efece7;
+}
+
+.ac-left-count {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: #6a6763;
+  background: #191c1f;
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+
+.ac-left-spacer { flex: 1; }
+
+.ac-iconbtn {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6a6763;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.ac-iconbtn:hover { background: #1e2226; color: #e6e4e0; }
+
+/* „Nowa jednostka" ma bursztynowy hover — jedyny akcent w nagłówku. */
+.ac-iconbtn.accent { color: #8d8a85; }
+.ac-iconbtn.accent:hover { background: rgba(224, 166, 60, .14); color: #e8b757; }
+
+/* ─── Wyszukiwarka ────────────────────────────────────────────────────────
+   height:31px; bg #191c1f; border 1px #24282c; radius 8px                  */
+
+.ac-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 31px;
+  padding: 0 10px;
+  background: #191c1f;
+  border: 1px solid #24282c;
+  border-radius: 8px;
+  transition: border-color .16s;
+}
+
+.ac-search:focus-within { border-color: #3a3f45; }
+
+.ac-search > svg { color: #6a6763; flex: 0 0 auto; }
+
+.ac-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 12.5px;
+  color: #e6e4e0;
+}
+
+.ac-search input::placeholder { color: #5f5c58; }
+
+/* ─── Filtry stron ────────────────────────────────────────────────────────
+   taca: gap 3px; margin-top 8px; padding 3px; bg #131618; radius 8px       */
+
+.ac-filters {
+  display: flex;
+  gap: 3px;
+  margin-top: 8px;
+  padding: 3px;
+  background: #131618;
+  border-radius: 8px;
+}
+
+.ac-filter {
+  flex: 1;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #7a7772;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.ac-filter.active { background: #22262a; color: #e6e4e0; }
+
+.ac-filter-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  flex: 0 0 auto;
+}
+
+/* ─── Ciało panelu ───────────────────────────────────────────────────────── */
+
+.ac-left-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ac-orbat {
+  padding: 6px 0 14px;
+  animation: acSlideL .22s ease both;
+}
+
+@keyframes acSlideL {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── Nagłówek grupy (sojusznicze / przeciwnika) ──────────────────────────
+   height:30px; padding:0 12px; hover bg #16191c                            */
+
+.ac-group { margin-bottom: 2px; }
+
+.ac-group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 12px;
+  cursor: pointer;
+  color: #8d8a85;
+  transition: background .14s;
+}
+
+.ac-group-head:hover { background: #16191c; }
+
+.ac-group-caret { color: #5f5c58; flex: 0 0 auto; display: grid; place-items: center; }
+
+.ac-group-swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.ac-group-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+.ac-group-count,
+.ac-group-ready {
+  font-family: "IBM Plex Mono", monospace;
+  color: #5f5c58;
+}
+
+.ac-group-count { font-size: 10.5px; }
+.ac-group-ready { font-size: 10px; }
+
+/* ─── Wiersz jednostki ────────────────────────────────────────────────────
+   min-height:38px; gap 9px; padding 5px 10px 5px {pad}; hover #1a1e21
+   pad = 10 + depth*18  (ustawiane inline z komponentu)                     */
+
+.ac-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 5px 10px 5px 10px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  transition: background .14s;
+}
+
+.ac-row:hover { background: #1a1e21; }
+.ac-row.selected { background: rgba(224, 166, 60, .09); }
+
+/* Kreska przy krawędzi: bursztyn = zaznaczona, czerwień = w starciu. */
+.ac-row-mark {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: transparent;
+}
+
+.ac-row-sym {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 24px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ac-row-content { flex: 1; min-width: 0; }
+
+.ac-row-namerow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ac-row-name {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #c9c5bf;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ac-row.selected .ac-row-name { color: #efece7; }
+.ac-row.hidden-unit .ac-row-name { color: #5f5c58; }
+.ac-row.hidden-unit .ac-row-sym { opacity: .4; }
+
+.ac-row-engaged {
+  color: #d9635a;
+  flex: 0 0 auto;
+  animation: acBlink 1.4s infinite;
+}
+
+@keyframes acBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .2; }
+}
+
+.ac-row-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 3px;
+}
+
+.ac-row-echelon {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9.5px;
+  color: #6a6763;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+
+.ac-row-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: #23272b;
+  overflow: hidden;
+  max-width: 74px;
+}
+
+.ac-row-bar > span {
+  display: block;
+  height: 3px;
+  border-radius: 99px;
+  transition: width .4s;
+}
+
+.ac-row-pct {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9.5px;
+}
+
+/* Przyciski w wierszu — makieta: oko 24px, strzałka 22px, obie radius 6px. */
+.ac-row-btn {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.ac-row-eye { width: 24px; height: 24px; color: #7a7772; }
+.ac-row-eye.off { color: #5f5c58; }
+.ac-row-kids { width: 22px; height: 22px; color: #6a6763; }
+
+.ac-row-btn:hover { background: #23282c; color: #e6e4e0; }
+
+/* ─── Brak wyników ───────────────────────────────────────────────────────── */
+
+.ac-noresults {
+  padding: 24px 16px;
+  text-align: center;
+  color: #5f5c58;
+  font-size: 12px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Zakładka „Symulacja" — 1:1 z makietą (sekcja <!-- SYMULACJA -->)
+   ════════════════════════════════════════════════════════════════════════ */
+
+.ac-sim {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: acSlideL .22s ease both;
+}
+
+/* Nagłówek sekcji — 10px, uppercase, letter-spacing .1em. */
+.ac-sec-title {
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #5f5c58;
+  font-weight: 600;
+  margin-bottom: 9px;
+  display: block;
+}
+
+.ac-sec-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+
+.ac-sec-row .ac-sec-title { margin-bottom: 0; }
+
+/* ─── Przyciski silnika (2 × 2) ───────────────────────────────────────── */
+
+.ac-sim-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ac-simbtn {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 8px;
+  border: 1px solid #2a2e33;
+  background: transparent;
+  color: #c9c5bf;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s;
+}
+
+.ac-simbtn:hover { background: #1c2024; border-color: #3a3f45; }
+
+/* Start zielony, Pauza czerwona — te same wartości co przycisk w pasku. */
+.ac-simbtn.primary {
+  border-color: rgba(134, 176, 106, .45);
+  background: rgba(134, 176, 106, .12);
+  color: #98c07c;
+}
+
+.ac-simbtn.primary.running {
+  border-color: rgba(217, 99, 90, .45);
+  background: rgba(217, 99, 90, .12);
+  color: #e08078;
+}
+
+.ac-simbtn.on {
+  border-color: rgba(224, 166, 60, .45);
+  background: rgba(224, 166, 60, .1);
+  color: #e8b757;
+}
+
+/* ─── Tempo ──────────────────────────────────────────────────────────────── */
+
+.ac-tempo-val {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11.5px;
+  color: #e0a63c;
+}
+
+.ac-range {
+  width: 100%;
+  accent-color: #e0a63c;
+  background: transparent;
+}
+
+/* ─── Modyfikatory terenu ────────────────────────────────────────────────── */
+
+.ac-terrain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ac-terrain-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ac-terrain-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.ac-terrain-name {
+  font-size: 12px;
+  color: #c9c5bf;
+  flex: 0 0 76px;
+}
+
+.ac-terrain-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: #1e2226;
+  overflow: hidden;
+}
+
+.ac-terrain-bar > span {
+  display: block;
+  height: 4px;
+  border-radius: 99px;
+}
+
+.ac-terrain-mod {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  flex: 0 0 34px;
+  text-align: right;
+}
+
+/* ─── Bilans sił ─────────────────────────────────────────────────────────── */
+
+.ac-balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ac-balance-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #8d8a85;
+  margin-bottom: 4px;
+}
+
+.ac-balance-nums { font-family: "IBM Plex Mono", monospace; }
+
+.ac-balance-bar {
+  display: flex;
+  height: 5px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: #1e2226;
+}
+
+.ac-balance-bar > span { height: 5px; transition: width .5s; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Zakładki „Starcia", „Porównaj", „Monitoring" — 1:1 z makietą
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Stan pusty (wspólny) ──────────────────────────────────────────────── */
+
+.ac-empty {
+  padding: 36px 14px;
+  text-align: center;
+}
+
+.ac-empty > svg { color: #3a3f45; }
+
+.ac-empty-title {
+  font-size: 12.5px;
+  color: #6a6763;
+  margin-top: 10px;
+}
+
+.ac-empty-hint {
+  font-size: 11.5px;
+  color: #4a4744;
+  margin-top: 4px;
+}
+
+/* ─── Starcia ────────────────────────────────────────────────────────────── */
+
+.ac-eng {
+  padding: 10px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: acSlideL .22s ease both;
+}
+
+.ac-eng-card {
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: #16191c;
+  border: 1px solid #24282c;
+  border-left: 2px solid #d9635a;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background .16s;
+  animation: acIn .24s ease both;
+}
+
+.ac-eng-card:hover { background: #1c2024; }
+
+@keyframes acIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.ac-eng-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+
+.ac-eng-head > svg { color: #d9635a; flex: 0 0 auto; }
+
+.ac-eng-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #e08078;
+  letter-spacing: .04em;
+}
+
+.ac-eng-dist {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: #6a6763;
+}
+
+.ac-eng-sides {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ac-eng-side { flex: 1; min-width: 0; }
+
+.ac-eng-name {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ac-eng-name.f { color: #7fb0dd; }
+.ac-eng-name.h { color: #d9635a; text-align: right; }
+
+.ac-eng-barrow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+.ac-eng-bar {
+  flex: 1;
+  height: 3px;
+  border-radius: 99px;
+  background: #23272b;
+  overflow: hidden;
+}
+
+.ac-eng-bar > span { display: block; height: 3px; border-radius: 99px; }
+
+.ac-eng-pct {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9.5px;
+  color: #6a6763;
+}
+
+.ac-eng-vs {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: #4a4744;
+  flex: 0 0 auto;
+}
+
+.ac-eng-foot {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid #22262a;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ac-eng-foot-label { font-size: 11px; color: #6a6763; }
+.ac-eng-adv { font-size: 11.5px; font-weight: 500; }
+
+.ac-eng-terrain {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: #6a6763;
+}
+
+/* ─── Porównaj ──────────────────────────────────────────────────────────── */
+
+.ac-cmp {
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: acSlideL .22s ease both;
+}
+
+.ac-cmp-note {
+  font-size: 11.5px;
+  color: #8d8a85;
+  line-height: 1.5;
+}
+
+.ac-cmp-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.ac-cmp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+
+.ac-cmp-name {
+  font-size: 12px;
+  color: #c9c5bf;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ac-cmp-score {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.ac-cmp-bar {
+  height: 6px;
+  border-radius: 99px;
+  background: #1e2226;
+  overflow: hidden;
+}
+
+.ac-cmp-bar > span {
+  display: block;
+  height: 6px;
+  border-radius: 99px;
+  transition: width .5s;
+}
+
+/* ─── Monitoring ────────────────────────────────────────────────────────── */
+
+.ac-mon {
+  padding: 10px 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: acSlideL .22s ease both;
+}
+
+.ac-mon-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border-radius: 9px;
+  background: #16191c;
+  border: 1px solid #24282c;
+  margin-bottom: 8px;
+}
+
+.ac-mon-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  flex: 0 0 auto;
+}
+
+.ac-mon-dot.on { background: #86b06a; animation: acBlink 1.6s infinite; }
+.ac-mon-dot.off { background: #4a4744; }
+
+.ac-mon-label { font-size: 12px; color: #c9c5bf; }
+
+.ac-mon-count {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: #6a6763;
+}
+
+.ac-mon-row {
+  display: flex;
+  gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #1a1d20;
+  animation: acIn .2s ease both;
+}
+
+.ac-mon-time {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  color: #5f5c58;
+  flex: 0 0 44px;
+  padding-top: 1px;
+}
+
+.ac-mon-icon { flex: 0 0 auto; padding-top: 1px; }
+
+.ac-mon-text {
+  font-size: 12px;
+  color: #c9c5bf;
+  line-height: 1.35;
+}
+
+.ac-mon-meta {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: #5f5c58;
+  margin-top: 2px;
+}
+
+.ac-mon-empty {
+  padding: 30px 14px;
+  text-align: center;
+  color: #5f5c58;
+  font-size: 12px;
+}

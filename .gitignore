@@ -34,3 +34,7 @@ __pycache__
 *.db
 *.db-shm
 *.db-wal
+Operacja Cichy Grom/*
+project/*
+# Rastry terenu (WorldCover, Copernicus DEM) — pobierane skryptem server/scripts/download_terrain_data.py
+server/data/terrain/

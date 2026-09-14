@@ -1,3 +1,5 @@
+import { RefreshCw, StepForward, FastForward, ListChecks, Repeat, Square } from "lucide-react";
+
 type Props = {
   selectedUnitId: string | null;
   onRefresh: () => Promise<void>;
@@ -21,37 +23,35 @@ export default function SimulationControls({
 }: Props) {
   return (
     <div className="sim-ctrl-panel">
-      <div className="section-title">Sterowanie symulacją</div>
-
-      <div className="sim-ctrl-grid">
-        <button className="action-btn secondary full" onClick={onRefresh}>
-          🔄 Odśwież dane
+      <div className="sim-grid">
+        <button className="action-btn" onClick={() => void onRefresh()}>
+          <RefreshCw size={14} />Odśwież dane
         </button>
 
         <button
-          className="action-btn primary full"
-          onClick={onStepSelected}
+          className="action-btn"
+          onClick={() => void onStepSelected()}
           disabled={!selectedUnitId}
-          title={!selectedUnitId ? "Wybierz jednostkę na mapie" : ""}
+          title={!selectedUnitId ? "Wybierz jednostkę na mapie" : "Wykonaj krok wybranej jednostki"}
         >
-          ▶ Krok wybranej
+          <StepForward size={14} />Krok wybranej
         </button>
 
-        <button className="action-btn primary full" onClick={onStepAll}>
-          ⏩ Krok wszystkich
+        <button className="action-btn" onClick={() => void onStepAll()}>
+          <FastForward size={14} />Krok wszystkich
         </button>
 
-        <button className="action-btn full" onClick={onRunRules}>
-          📋 Sprawdź reguły
+        <button className="action-btn" onClick={() => void onRunRules()}>
+          <ListChecks size={14} />Sprawdź reguły
         </button>
 
         {!isRunning ? (
-          <button className="action-btn warn full" onClick={onStart}>
-            🔁 Auto symulacja
+          <button className="action-btn primary" onClick={onStart}>
+            <Repeat size={14} />Auto symulacja
           </button>
         ) : (
-          <button className="action-btn danger full" onClick={onStop}>
-            ⏹ Stop auto
+          <button className="action-btn danger" onClick={onStop}>
+            <Square size={14} />Stop auto
           </button>
         )}
       </div>

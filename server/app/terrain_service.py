@@ -66,8 +66,39 @@ class MockTerrainProvider(TerrainProvider):
         }
 
 
-# Global provider instance — swap for real DEM provider later
-_provider = MockTerrainProvider()
+class DataTerrainProvider(TerrainProvider):
+    """
+    Teren z lokalnych rastrów (ESA WorldCover + Copernicus DEM) — patrz
+    services/terrain_data_service.py. Bez pobranych danych lub bez rasterio
+    wraca do MockTerrainProvider, żeby tworzenie jednostek dalej działało.
+    """
+
+    COVER = {"forest": 0.8, "urban": 0.7, "wetland": 0.4, "road": 0.1, "open": 0.1, "water": 0.0}
+
+    def __init__(self):
+        self._fallback = MockTerrainProvider()
+
+    def assess(self, lon: float, lat: float) -> dict:
+        from .services.terrain_data_service import point_terrain
+
+        stats = point_terrain(lon, lat)
+        if stats is None:
+            return self._fallback.assess(lon, lat)
+
+        cover = round(sum(share * self.COVER.get(c, 0.3) for c, share in stats["shares"].items()), 2)
+        slope = float(stats.get("mean_slope_deg") or 0.0)
+        defense = round(min(max(cover * 0.6 + min(slope / 45.0, 1) * 0.4, 0), 1), 2)
+        return {
+            "elevation_m": float(stats.get("elevation_m") or 0.0),
+            "slope_deg": round(slope, 1),
+            "terrain_type": stats["dominant"],
+            "cover_score": cover,
+            "defense_score": defense,
+        }
+
+
+# Global provider instance — dane rastrowe, a bez nich atrapa
+_provider = DataTerrainProvider()
 
 
 def get_terrain_provider() -> TerrainProvider:

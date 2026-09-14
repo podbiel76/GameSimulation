@@ -8,10 +8,43 @@
  * są parametrami konfiguracyjnymi, nie doktrynowymi wartościami.
  */
 
+import { simLog } from "./debug";
+
 // ─── Typy podstawowe ────────────────────────────────────────────────────────
 
 export type TerrainClass = "forest" | "water" | "wetland" | "urban" | "road" | "open";
 export type CombatCategory = "infantry" | "armor" | "artillery" | "anti_air" | "air";
+
+/** Rozkład terenu — udziały klas (np. z WorldCover); nie muszą sumować się do 1. */
+export type TerrainMix = Partial<Record<TerrainClass, number>>;
+/** Teren wejściowy modelu: jedna klasa albo rozkład klas. */
+export type TerrainInput = TerrainClass | TerrainMix;
+
+const TERRAIN_ORDER: TerrainClass[] = ["forest", "water", "wetland", "urban", "road", "open"];
+
+/** Klasa o największym udziale (remis → kolejność TERRAIN_ORDER, pusty rozkład → open). */
+export function dominantTerrain(input: TerrainInput): TerrainClass {
+  if (typeof input === "string") return input;
+  let best: TerrainClass = "open";
+  let bestShare = 0;
+  for (const c of TERRAIN_ORDER) {
+    const s = input[c] ?? 0;
+    if (s > bestShare) { best = c; bestShare = s; }
+  }
+  return best;
+}
+
+/** Modyfikator terenu: dla rozkładu — średnia z tabeli ważona udziałami klas. */
+export function terrainModifierFor(table: Record<TerrainClass, number>, input: TerrainInput): number {
+  if (typeof input === "string") return table[input] ?? 1.0;
+  let total = 0;
+  let acc = 0;
+  for (const c of TERRAIN_ORDER) {
+    const s = input[c] ?? 0;
+    if (s > 0) { total += s; acc += s * (table[c] ?? 1.0); }
+  }
+  return total > 0 ? acc / total : (table.open ?? 1.0);
+}
 
 // Rozszerzony typ logistyki (frontend ma podzbiór — reszta opcjonalna)
 export type ExtendedLogistics = {
@@ -74,7 +107,10 @@ export type PotentialBreakdown = {
   effectivePotential: number; // static × wszystkie modyfikatory
   // Rola i teren użyte do obliczeń
   role: CombatRole;
+  /** Klasa dominująca (przy rozkładzie — o największym udziale). */
   terrain: TerrainClass;
+  /** Rozkład terenu, gdy potencjał liczono z profilu terenu. */
+  terrainMix?: TerrainMix;
 };
 
 export type CombatRole = "attacker" | "defender" | "neutral";
@@ -386,7 +422,7 @@ function mergeConfig(partial?: Partial<PotentialConfig>): PotentialConfig {
 
 export function computeUnitPotential(
   unit: UnitLike,
-  terrain: TerrainClass = "open",
+  terrain: TerrainInput = "open",
   partialConfig?: Partial<PotentialConfig>,
   role: CombatRole = "neutral",
 ): UnitPotentialResult {
@@ -495,7 +531,7 @@ export function computeUnitPotential(
     role === "attacker" ? cfg.terrainModifiersAttacker :
     role === "defender" ? cfg.terrainModifiersDefender :
     cfg.terrainModifiers;
-  const terrainModifier = clamp(terrainTable[terrain] ?? 1.0, 0, 2.0);
+  const terrainModifier = clamp(terrainModifierFor(terrainTable, terrain), 0, 2.0);
   const combatEffectivenessModifier = ceModifier;
 
   const effectivePotential = clamp(
@@ -527,7 +563,8 @@ export function computeUnitPotential(
       staticPotential,
       effectivePotential,
       role,
-      terrain,
+      terrain: dominantTerrain(terrain),
+      ...(typeof terrain === "string" ? {} : { terrainMix: terrain }),
     },
   };
 }
@@ -591,8 +628,8 @@ export function compareCombatPotential(
   ownUnits: UnitLike[],
   targetUnits: UnitLike[],
   options?: {
-    ownTerrainByUnitId?: Record<string, TerrainClass>;
-    targetTerrainByUnitId?: Record<string, TerrainClass>;
+    ownTerrainByUnitId?: Record<string, TerrainInput>;
+    targetTerrainByUnitId?: Record<string, TerrainInput>;
     ownRole?: CombatRole;
     targetRole?: CombatRole;
     config?: Partial<PotentialConfig>;
@@ -652,8 +689,7 @@ export function compareCombatPotential(
     engagementPrediction,
   };
 
-  // eslint-disable-next-line no-console
-  console.log("[COMBAT POTENTIAL] comparison", {
+  simLog(() => ["[COMBAT POTENTIAL] comparison", {
     ownUnits: ownResults.map(r => ({ name: r.unitName, ...r.breakdown })),
     targetUnits: targetResults.map(r => ({ name: r.unitName, ...r.breakdown })),
     summary: {
@@ -666,7 +702,7 @@ export function compareCombatPotential(
     },
     categoryComparison,
     engagementPrediction,
-  });
+  }]);
 
   return result;
 }

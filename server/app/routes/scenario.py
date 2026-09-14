@@ -15,6 +15,12 @@ _to_4326 = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True)
 
 router = APIRouter(tags=["scenario"])
 
+# Tabela `assessments` rośnie monotonicznie (run_all_rules dopisuje przy każdym kroku),
+# a full-state serializował ją w całości przy każdym pobraniu — także w pętli symulacji,
+# po każdym dojściu jednostki do celu. UI pokazuje wyłącznie najnowsze wpisy.
+# Limit jest świadomie hojny; docelowo full-state znika na rzecz delt po WebSockecie.
+FULL_STATE_ASSESSMENT_LIMIT = 500
+
 
 # ═══════════════════════════════════════════════════════════════════════
 #  Full State Helper
@@ -24,7 +30,12 @@ def get_full_state_data(db: Session) -> dict:
     units = db.query(models.Unit).options(joinedload(models.Unit.logistics)).all()
     routes = db.query(models.Route).options(joinedload(models.Route.points)).all()
     tracks = db.query(models.UnitTrack).options(joinedload(models.UnitTrack.states)).all()
-    assessments = db.query(models.Assessment).order_by(models.Assessment.timestamp.desc()).all()
+    assessments = (
+        db.query(models.Assessment)
+        .order_by(models.Assessment.timestamp.desc())
+        .limit(FULL_STATE_ASSESSMENT_LIMIT)
+        .all()
+    )
     rules = db.query(models.ScenarioRule).all()
     hierarchy_links = get_all_hierarchy_links(db)
     areas = get_all_areas(db)

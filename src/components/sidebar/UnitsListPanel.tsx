@@ -1,9 +1,83 @@
-import { useState } from "react";
-import { ChevronsDown, ChevronUp, Ban, Eye, EyeOff, ChevronRight, ChevronDown, Layers } from "lucide-react";
+import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
+// Ikony Phosphor — ten sam zestaw co makieta (`ph ph-*`).
+import {
+  MagnifyingGlass, Eye, EyeSlash,
+  CaretDown, CaretRight, CaretUp, Crosshair,
+} from "@phosphor-icons/react";
+import AcLeftHeader from "./AcLeftHeader";
 import { getSymbolUrl } from "../../data/symbolCatalog";
 import type { Unit } from "../../types/map";
 import type { HierarchyLink } from "../../types/simulation";
-import { UNIT_HIERARCHY_ORDER } from "../../utils/hierarchyVisibility";
+import { readinessOf } from "../../utils/readiness";
+
+/**
+ * Lewy panel — odwzorowanie 1:1 makiety `project/AICOMMAND.dc.html`
+ * (sekcja „LEWY PANEL" / ORBAT).
+ *
+ * Wartości układu pochodzą wprost z inline'owych stylów makiety i mieszkają
+ * w `src/aicommand-left.css` pod przedrostkiem `ac-`. Nie używamy tu klas
+ * .sidebar / .unit-list-* — te niosą wcześniejszy, rozjeżdżający się layout.
+ *
+ * Świadome odstępstwa (poza układem):
+ *  · makieta rozwija drzewo tylko o jeden poziom; tu rekurencja jest pełna,
+ *    bo hierarchia przychodzi z bazy i bywa głębsza. Wcięcie liczone tym samym
+ *    wzorem co w makiecie: pad = 10 + depth × 18 px.
+ */
+
+// Kolory z makiety (BLUE / RED / GREEN / AMBER).
+const BLUE = "#7fb0dd";
+const RED = "#d9635a";
+const GREEN = "#86b06a";
+const AMBER = "#e0a63c";
+
+/** Skrót szczebla w formacie makiety: „X · BDE". */
+const ECHELON_MARK: Record<string, string> = {
+  region_theater: "XXXXX",
+  army_group_front: "XXXXXX",
+  army: "XXXX",
+  corps_mef: "XXX",
+  division: "XX",
+  brigade: "X",
+  regiment_group: "III",
+  battalion_squadron: "II",
+  company_battery_troop: "I",
+  platoon_detachment: "•••",
+  section: "••",
+  squad: "•",
+  team_crew: "⊘",
+};
+
+const ECHELON_ABBR: Record<string, string> = {
+  region_theater: "THTR",
+  army_group_front: "AGF",
+  army: "ARMY",
+  corps_mef: "CORPS",
+  division: "DIV",
+  brigade: "BDE",
+  regiment_group: "REG",
+  battalion_squadron: "BN",
+  company_battery_troop: "CO",
+  platoon_detachment: "PLT",
+  section: "SEC",
+  squad: "SQD",
+  team_crew: "TM",
+};
+
+function echelonCode(echelon?: string): string {
+  if (!echelon) return "—";
+  const key = echelon.toLowerCase();
+  const mark = ECHELON_MARK[key];
+  const abbr = ECHELON_ABBR[key] ?? echelon.replace(/_/g, " ").toUpperCase();
+  return mark ? `${mark} · ${abbr}` : abbr;
+}
+
+/** Kolor paska gotowości — progi z makiety: >65 zielony, >35 bursztyn, reszta czerwony. */
+function readyColor(pct: number): string {
+  return pct > 65 ? GREEN : pct > 35 ? AMBER : RED;
+}
+
+type SideFilter = "all" | "friendly" | "hostile";
 
 type Props = {
   units: Unit[];
@@ -16,266 +90,205 @@ type Props = {
   onToggleExpand: (id: string) => void;
   onToggleUnitVisibility: (id: string) => void;
   onToggleGroupVisibility: (side: "friendly" | "hostile") => void;
-  // Layer controls
-  showAreasLayer: boolean;
-  isHierarchicalZoom: boolean;
-  visibleEchelons: Set<string>;
-  onToggleAreasLayer: () => void;
-  onToggleHierarchicalZoom: () => void;
-  onToggleEchelon: (echelon: string) => void;
-  onApplyEchelonPreset: (preset: "all" | "higher" | "lower" | "none") => void;
+  onAddUnit?: () => void;
+  onCollapse?: () => void;
 };
 
-// ─── Layers panel ────────────────────────────────────────────────────────────
-
-function LayerRow({ label, active, onToggle, indent = false }: {
-  label: string; active: boolean; onToggle: () => void; indent?: boolean;
-}) {
-  return (
-    <div className="layers-item" style={{ paddingLeft: indent ? 28 : 12 }} onClick={onToggle}>
-      <button className="layers-visibility-btn" onClick={e => { e.stopPropagation(); onToggle(); }}>
-        {active ? <Eye size={15} /> : <EyeOff size={15} />}
-      </button>
-      <span className={`layers-item-label ${active ? "" : "layers-item-hidden"}`}>{label}</span>
-    </div>
-  );
-}
-
-function LayersPanel({
-  showAreasLayer, isHierarchicalZoom, visibleEchelons,
-  onToggleAreasLayer, onToggleHierarchicalZoom,
-  onToggleEchelon, onApplyEchelonPreset,
-}: Pick<Props,
-  "showAreasLayer" | "isHierarchicalZoom" | "visibleEchelons" |
-  "onToggleAreasLayer" | "onToggleHierarchicalZoom" |
-  "onToggleEchelon" | "onApplyEchelonPreset"
->) {
-  const [open, setOpen] = useState(true);
-  const [echelonsOpen, setEchelonsOpen] = useState(false);
-
-  return (
-    <div className="layers-panel">
-      <div className="layers-panel-header" onClick={() => setOpen(v => !v)}>
-        <Layers size={15} />
-        <span>Warstwy mapy</span>
-        {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-      </div>
-      {open && (
-        <div className="layers-panel-body">
-          <LayerRow label="Obszary Odpowiedzialności" active={showAreasLayer} onToggle={onToggleAreasLayer} />
-          <LayerRow label="Zoom Hierarchiczny" active={isHierarchicalZoom} onToggle={onToggleHierarchicalZoom} />
-          <div className="layers-divider" />
-          <div className="layers-group-header" onClick={() => setEchelonsOpen(v => !v)} style={{ paddingLeft: 12 }}>
-            {echelonsOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            <span>Widoczność szczebli</span>
-          </div>
-          {echelonsOpen && (
-            <>
-              <div className="layers-preset-row">
-                <button className="layers-preset-btn" onClick={() => onApplyEchelonPreset("all")}>Wszystkie</button>
-                <button className="layers-preset-btn" onClick={() => onApplyEchelonPreset("higher")}>Wyższe</button>
-                <button className="layers-preset-btn" onClick={() => onApplyEchelonPreset("lower")}>Niższe</button>
-                <button className="layers-preset-btn" onClick={() => onApplyEchelonPreset("none")}>Czyść</button>
-              </div>
-              <div className="layers-echelon-list">
-                {UNIT_HIERARCHY_ORDER.map(echelon => (
-                  <div key={echelon} className="layers-echelon-row" onClick={() => onToggleEchelon(echelon)}>
-                    <input
-                      type="checkbox"
-                      className="layers-echelon-check"
-                      checked={visibleEchelons.has(echelon)}
-                      onChange={() => {}}
-                      onClick={e => e.stopPropagation()}
-                    />
-                    <span className={`layers-item-label ${visibleEchelons.has(echelon) ? "" : "layers-item-hidden"}`}>
-                      {echelon.replace(/_/g, " ")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Unit group (Friendly / Hostile) ─────────────────────────────────────────
-
-function UnitGroup({
-  side, units, hierarchy, selectedUnitId, expandedUnits, engagedUnitIds,
-  hiddenUnitIds, onSelectUnit, onToggleExpand, onToggleUnitVisibility, onToggleGroupVisibility,
-}: {
-  side: "friendly" | "hostile";
-  units: Unit[];
-  hierarchy: HierarchyLink[];
-  selectedUnitId: string | null;
-  expandedUnits: Set<string>;
-  engagedUnitIds?: Set<string>;
-  hiddenUnitIds: Set<string>;
-  onSelectUnit: (id: string) => void;
-  onToggleExpand: (id: string) => void;
-  onToggleUnitVisibility: (id: string) => void;
-  onToggleGroupVisibility: (side: "friendly" | "hostile") => void;
-}) {
-  const [open, setOpen] = useState(true);
-
-  const sideUnits = units.filter(u => u.side === side);
-  const color = side === "friendly" ? "#60a5fa" : "#f87171";
-  const label = side === "friendly" ? "Jednostki sojusznicze" : "Jednostki wrogie";
-  const allHidden = sideUnits.length > 0 && sideUnits.every(u => hiddenUnitIds.has(u.id));
-
-  const childrenMap: Record<string, string[]> = {};
-  const hasParent = new Set<string>();
-  hierarchy.forEach(link => {
-    if (!childrenMap[link.parent_unit_id]) childrenMap[link.parent_unit_id] = [];
-    childrenMap[link.parent_unit_id].push(link.child_unit_id);
-    hasParent.add(link.child_unit_id);
+export default function UnitsListPanel({
+  units, hierarchy, selectedUnitId, expandedUnits, engagedUnitIds,
+  hiddenUnitIds, onSelectUnit, onToggleExpand, onToggleUnitVisibility,
+  onAddUnit, onCollapse,
+}: Props) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<SideFilter>("all");
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    friendly: true, hostile: true,
   });
 
-  const renderUnit = (unitId: string, depth = 0): React.ReactNode => {
-    const u = sideUnits.find(unit => unit.id === unitId);
-    if (!u) return null;
-    const childrenIds = childrenMap[unitId] || [];
-    const hasChildren = childrenIds.length > 0;
-    const isExpanded = expandedUnits.has(unitId);
-    const isEngaged = engagedUnitIds?.has(u.id) ?? false;
+  const q = query.trim().toLowerCase();
+  const matches = (u: Unit) =>
+    !q ||
+    u.symbol_name?.toLowerCase().includes(q) ||
+    u.custom_name?.toLowerCase().includes(q) ||
+    u.echelon?.toLowerCase().includes(q) ||
+    u.unit_type?.toLowerCase().includes(q);
+
+  const { childrenMap, hasParent } = useMemo(() => {
+    const cm: Record<string, string[]> = {};
+    const hp = new Set<string>();
+    for (const link of hierarchy) {
+      (cm[link.parent_unit_id] ||= []).push(link.child_unit_id);
+      hp.add(link.child_unit_id);
+    }
+    return { childrenMap: cm, hasParent: hp };
+  }, [hierarchy]);
+
+  const visibleSides: ("friendly" | "hostile")[] =
+    filter === "all" ? ["friendly", "hostile"] : [filter];
+
+  const filters: { key: SideFilter; label: string; dot: string }[] = [
+    { key: "all", label: "Wszystkie", dot: "#6a6763" },
+    { key: "friendly", label: "Sojusz", dot: BLUE },
+    { key: "hostile", label: "Przeciwnik", dot: RED },
+  ];
+
+  let anyRows = false;
+
+  const renderRow = (u: Unit, depth: number, sideUnits: Unit[]): ReactNode => {
+    const kids = (childrenMap[u.id] ?? [])
+      .map(id => sideUnits.find(x => x.id === id))
+      .filter((x): x is Unit => !!x && matches(x));
+    const hasKids = kids.length > 0;
+    const isExpanded = expandedUnits.has(u.id);
     const isHidden = hiddenUnitIds.has(u.id);
+    const isEngaged = engagedUnitIds?.has(u.id) ?? false;
+    const isSelected = selectedUnitId === u.id;
+    const pct = readinessOf(u);
+
+    const mark = isSelected ? AMBER : isEngaged ? RED : "transparent";
 
     return (
-      <div key={u.id} className="unit-list-tree-item" style={{ marginLeft: depth > 0 ? depth * 12 : 0 }}>
+      <div key={u.id}>
         <div
-          className={`unit-list-item-wrapper ${selectedUnitId === u.id ? "active" : ""}`}
-          style={{
-            ...(isEngaged ? { borderLeft: "3px solid #ef4444", background: "rgba(239,68,68,0.06)" } : {}),
-            ...(isHidden ? { opacity: 0.45 } : {}),
-          }}
+          className={
+            "ac-row" +
+            (isSelected ? " selected" : "") +
+            (isHidden ? " hidden-unit" : "")
+          }
+          style={{ paddingLeft: 10 + depth * 18 }}
+          onClick={() => onSelectUnit(u.id)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => { if (e.key === "Enter") onSelectUnit(u.id); }}
         >
-          <button className="unit-list-item" onClick={() => onSelectUnit(u.id)}>
-            <img src={getSymbolUrl(u.symbol_id)} alt="" className="unit-list-icon" />
-            <div className="unit-list-info">
-              <div className="unit-list-name">
-                {isEngaged && <span style={{ marginRight: 4, fontSize: 12 }} title="Aktywne starcie">⚔</span>}
-                {u.symbol_name}
-              </div>
-              <div className="unit-list-meta">{u.echelon?.replace(/_/g, " ")} · {u.source}</div>
+          <span className="ac-row-mark" style={{ background: mark }} />
+          <div
+            className="ac-row-sym"
+            style={{ backgroundImage: `url(${getSymbolUrl(u.symbol_id)})` }}
+          />
+          <div className="ac-row-content">
+            <div className="ac-row-namerow">
+              <span className="ac-row-name">{u.symbol_name}</span>
+              {isEngaged && (
+                <Crosshair size={11} className="ac-row-engaged" aria-label="Aktywne starcie" />
+              )}
             </div>
-            <button
-              className="layers-visibility-btn"
-              style={{ marginRight: 4, flexShrink: 0 }}
-              onClick={e => { e.stopPropagation(); onToggleUnitVisibility(u.id); }}
-              title={isHidden ? "Pokaż na mapie" : "Ukryj na mapie"}
-            >
-              {isHidden ? <EyeOff size={15} /> : <Eye size={15} />}
-            </button>
-            {hasChildren ? (
-              <button className={`expand-btn ${isExpanded ? "expanded" : ""}`} onClick={e => { e.stopPropagation(); onToggleExpand(u.id); }}>
-                {isExpanded ? <ChevronUp size={15}/> : <ChevronsDown size={15} />}
-              </button>
-            ) : (
-              <div><Ban size={15}/></div>
-            )}
-          </button>
-        </div>
-        {hasChildren && isExpanded && (
-          <div className="unit-list-children">
-            {childrenIds.map(childId => renderUnit(childId, depth + 1))}
+            <div className="ac-row-meta">
+              <span className="ac-row-echelon">{echelonCode(u.echelon)}</span>
+              {pct !== null && (
+                <>
+                  <span className="ac-row-bar">
+                    <span style={{ width: `${pct}%`, background: readyColor(pct) }} />
+                  </span>
+                  <span className="ac-row-pct" style={{ color: readyColor(pct) }}>{pct}%</span>
+                </>
+              )}
+            </div>
           </div>
-        )}
+
+          <button
+            className={"ac-row-btn ac-row-eye" + (isHidden ? " off" : "")}
+            title="Widoczność na mapie"
+            onClick={e => { e.stopPropagation(); onToggleUnitVisibility(u.id); }}
+          >
+            {isHidden ? <EyeSlash size={14} /> : <Eye size={14} />}
+          </button>
+
+          {hasKids && (
+            <button
+              className="ac-row-btn ac-row-kids"
+              title="Podległe"
+              onClick={e => { e.stopPropagation(); onToggleExpand(u.id); }}
+            >
+              {isExpanded ? <CaretUp size={13} /> : <CaretDown size={13} />}
+            </button>
+          )}
+        </div>
+
+        {hasKids && isExpanded && kids.map(k => renderRow(k, depth + 1, sideUnits))}
       </div>
     );
   };
 
-  const roots = sideUnits.filter(u => !hasParent.has(u.id));
+  const groups = visibleSides.map(side => {
+    const all = units.filter(u => u.side === side && matches(u));
+    const roots = all.filter(u => !hasParent.has(u.id));
+    const rated = all.map(readinessOf).filter((v): v is number => v !== null);
+    const avg = rated.length ? Math.round(rated.reduce((a, b) => a + b, 0) / rated.length) : 0;
+    const open = openGroups[side] !== false;
+    if (all.length > 0) anyRows = true;
+
+    return {
+      side,
+      label: side === "friendly" ? "Jednostki sojusznicze" : "Jednostki przeciwnika",
+      color: side === "friendly" ? BLUE : RED,
+      count: all.length,
+      ready: `GOT ${avg}%`,
+      open,
+      roots,
+      all,
+    };
+  });
 
   return (
-    <div className="unit-group">
-      {/* Group header */}
-      <div className="unit-group-header">
-        <button className="unit-group-toggle" onClick={() => setOpen(v => !v)}>
-          {open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
-        </button>
-        <span className="unit-group-label" style={{ color }} onClick={() => setOpen(v => !v)}>
-          {label}
-        </span>
-        <span className="unit-group-count">{sideUnits.length}</span>
-        <button
-          className="layers-visibility-btn"
-          style={{ marginLeft: "auto" }}
-          onClick={() => onToggleGroupVisibility(side)}
-          title={allHidden ? "Pokaż grupę na mapie" : "Ukryj grupę na mapie"}
-        >
-          {allHidden ? <EyeOff size={15} /> : <Eye size={15} />}
-        </button>
-      </div>
+    <>
+      <AcLeftHeader
+        title="Struktura sił"
+        count={units.length}
+        onAdd={onAddUnit}
+        onCollapse={onCollapse}
+      >
+        <div className="ac-search">
+          <MagnifyingGlass size={14} />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Szukaj jednostki, szczebla…"
+          />
+        </div>
 
-      {/* Unit list */}
-      {open && (
-        <div className="unit-list">
-          {roots.map(u => renderUnit(u.id))}
-          {sideUnits.length === 0 && (
-            <div style={{ padding: "12px 14px", fontSize: 11, color: "var(--text-muted)" }}>
-              Brak jednostek
+        <div className="ac-filters">
+          {filters.map(f => (
+            <button
+              key={f.key}
+              className={"ac-filter" + (filter === f.key ? " active" : "")}
+              onClick={() => setFilter(f.key)}
+            >
+              <span className="ac-filter-dot" style={{ background: f.dot }} />
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </AcLeftHeader>
+
+      <div className="ac-left-body">
+        <div className="ac-orbat">
+          {groups.map(g => (
+            <div className="ac-group" key={g.side}>
+              <div
+                className="ac-group-head"
+                onClick={() => setOpenGroups(s => ({ ...s, [g.side]: !g.open }))}
+              >
+                <span className="ac-group-caret">
+                  {g.open ? <CaretDown size={12} /> : <CaretRight size={12} />}
+                </span>
+                <span className="ac-group-swatch" style={{ background: g.color }} />
+                <span className="ac-group-label" style={{ color: g.color }}>{g.label}</span>
+                <span className="ac-group-count">{g.count}</span>
+                <div className="ac-left-spacer" />
+                <span className="ac-group-ready">{g.ready}</span>
+              </div>
+              {g.open && g.roots.map(u => renderRow(u, 0, g.all))}
+            </div>
+          ))}
+
+          {!anyRows && (
+            <div className="ac-noresults">
+              {q ? <>Brak jednostek dla „{query}"</> : "Brak jednostek"}
             </div>
           )}
         </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Main panel ──────────────────────────────────────────────────────────────
-
-export default function UnitsListPanel({
-  units, hierarchy, selectedUnitId, expandedUnits, engagedUnitIds,
-  hiddenUnitIds, onSelectUnit, onToggleExpand, onToggleUnitVisibility, onToggleGroupVisibility,
-  showAreasLayer, isHierarchicalZoom, visibleEchelons,
-  onToggleAreasLayer, onToggleHierarchicalZoom, onToggleEchelon, onApplyEchelonPreset,
-}: Props) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <LayersPanel
-        showAreasLayer={showAreasLayer}
-        isHierarchicalZoom={isHierarchicalZoom}
-        visibleEchelons={visibleEchelons}
-        onToggleAreasLayer={onToggleAreasLayer}
-        onToggleHierarchicalZoom={onToggleHierarchicalZoom}
-        onToggleEchelon={onToggleEchelon}
-        onApplyEchelonPreset={onApplyEchelonPreset}
-      />
-
-      <div style={{ borderTop: "1px solid var(--border-default)" }}>
-        <div style={{ padding: "8px 14px 4px", fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", color: "var(--text-muted)", textTransform: "uppercase" }}>
-          Jednostki na mapie
-        </div>
-        <UnitGroup
-          side="friendly"
-          units={units}
-          hierarchy={hierarchy}
-          selectedUnitId={selectedUnitId}
-          expandedUnits={expandedUnits}
-          engagedUnitIds={engagedUnitIds}
-          hiddenUnitIds={hiddenUnitIds}
-          onSelectUnit={onSelectUnit}
-          onToggleExpand={onToggleExpand}
-          onToggleUnitVisibility={onToggleUnitVisibility}
-          onToggleGroupVisibility={onToggleGroupVisibility}
-        />
-        <UnitGroup
-          side="hostile"
-          units={units}
-          hierarchy={hierarchy}
-          selectedUnitId={selectedUnitId}
-          expandedUnits={expandedUnits}
-          engagedUnitIds={engagedUnitIds}
-          hiddenUnitIds={hiddenUnitIds}
-          onSelectUnit={onSelectUnit}
-          onToggleExpand={onToggleExpand}
-          onToggleUnitVisibility={onToggleUnitVisibility}
-          onToggleGroupVisibility={onToggleGroupVisibility}
-        />
       </div>
-    </div>
+    </>
   );
 }

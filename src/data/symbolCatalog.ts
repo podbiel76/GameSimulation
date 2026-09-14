@@ -1,3 +1,10 @@
+import { UNIT_CHILDREN as CANONICAL_UNIT_CHILDREN } from "../utils/hierarchyVisibility";
+
+// eager:true jest tu świadomym wyborem — katalog to ~270 plików PNG (≈4 MB) i tyle samo
+// modułów w grafie Vite. Wersja leniwa zwracałaby `() => Promise<string>`, co zerwałoby
+// synchroniczne `getSymbolUrl()` używane w funkcjach stylu OpenLayers (te muszą być sync).
+// Jeśli katalog urośnie o rząd wielkości, właściwym ruchem jest przeniesienie ikon
+// do `public/APP-6A/` i budowanie URL-a ze stringa — wtedy zero modułów i zero kosztu builda.
 const modules: Record<string, string> = import.meta.glob(
   "../assets/APP-6A/*.png",
   { eager: true, import: "default" }
@@ -45,45 +52,24 @@ export type UnitHierarchyNode = {
   children?: UnitHierarchyNode[];
 };
 
-export const UNIT_HIERARCHY_ORDER = [
-  "Region_Theater",
-  "Army_Group_Front",
-  "Army",
-  "Corps_MEF",
-  "Division",
-  "Brigade",
-  "Regiment_Group",
-  "Battalion_Squadron",
-  "Company_Battery",
-  "Platoon_Detachment",
-  "Section",
-  "Squad",
-  "Team_Crew",
-];
+// UWAGA: UNIT_HIERARCHY_ORDER i UNIT_CHILDREN były tu zdefiniowane po raz drugi,
+// w wersji sprzecznej z utils/hierarchyVisibility.ts:
+//   • "Company_Battery"  zamiast "Company_Battery_Troop"  → szczebel nie pasował do nazw plików ikon
+//   • Squad: null                                          → łańcuch podległości urywał się przed Team_Crew
+// Kanoniczna definicja żyje w utils/hierarchyVisibility.ts (tej używa App.tsx).
+// Re-eksport zachowany dla zgodności ścieżek importu.
+export { UNIT_HIERARCHY_ORDER, UNIT_CHILDREN } from "../utils/hierarchyVisibility";
 
-export const UNIT_CHILDREN: Record<string, string | null> = {
-  Region_Theater: "Army_Group_Front",
-  Army_Group_Front: "Army",
-  Army: "Corps_MEF",
-  Corps_MEF: "Division",
-  Division: "Brigade",
-  Brigade: "Regiment_Group",
-  Regiment_Group: "Battalion_Squadron",
-  Battalion_Squadron: "Company_Battery_Troop",
-  Company_Battery_Troop: "Platoon_Detachment",
-  Platoon_Detachment: "Section",
-  Section: "Squad",
-  Squad: null,
-};
+const UNIT_SIZE_BY_ID = new Map(UNIT_SIZES.map((s) => [s.id, s]));
 
 export function getUnitSizeLabel(sizeId: string) {
-  return UNIT_SIZES.find((s) => s.id === sizeId)?.label ?? sizeId;
+  return UNIT_SIZE_BY_ID.get(sizeId)?.label ?? sizeId;
 }
 
 export function buildUnitHierarchy(sizeId: string): UnitHierarchyNode | null {
   if (!sizeId || sizeId === "Unspecified") return null;
 
-  const childId = UNIT_CHILDREN[sizeId];
+  const childId = CANONICAL_UNIT_CHILDREN[sizeId];
 
   const node: UnitHierarchyNode = {
     id: sizeId,
@@ -125,6 +111,13 @@ export const symbolCatalog: SymbolEntry[] = Object.entries(modules).map(
   }
 );
 
+/**
+ * Indeks id → wpis. Wcześniej `getSymbolUrl` i `resolveSymbolForSize` robiły
+ * `Array.find` po całym katalogu — wołane per jednostka per render warstwy mapy
+ * i w funkcji stylu OpenLayers. Teraz O(1).
+ */
+const SYMBOL_BY_ID = new Map(symbolCatalog.map((s) => [s.id, s]));
+
 /** Curated subset: one icon per type at "Unspecified" size. */
 export const curatedSymbols: SymbolEntry[] = symbolCatalog.filter(
   (s) => s.size === "Unspecified"
@@ -163,9 +156,9 @@ export function resolveSymbolForSize(baseSymbolId: string, sizeId: string): Symb
   const prefix = baseSymbolId.substring(0, lastDunder);
   const targetId = `${prefix}__${sizeId}`;
 
-  return symbolCatalog.find((s) => s.id === targetId) ?? null;
+  return SYMBOL_BY_ID.get(targetId) ?? null;
 }
 
 export function getSymbolUrl(symbolId: string): string {
-  return symbolCatalog.find((s) => s.id === symbolId)?.url || "";
+  return SYMBOL_BY_ID.get(symbolId)?.url || "";
 }

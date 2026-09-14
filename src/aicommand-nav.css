@@ -1,0 +1,210 @@
+/* ════════════════════════════════════════════════════════════════════════
+   AICOMMAND — górny pasek 1:1 z makietą project/AICOMMAND.dc.html (<nav>)
+
+   Ta sama zasada co w aicommand-left.css: własna przestrzeń `ac-`, wartości
+   przepisane wprost z inline'owych stylów makiety, zero dziedziczenia po
+   .top-nav / .top-nav-tab z index.css.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Pasek ───────────────────────────────────────────────────────────────
+   height:46px; padding:0 10px 0 14px; bg #08090a; border-bottom 1px #1e2124 */
+
+.ac-nav {
+  height: 46px;
+  flex: 0 0 46px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 10px 0 14px;
+  background: #08090a;
+  border-bottom: 1px solid #1e2124;
+  position: relative;
+  z-index: 60;
+}
+
+/* ─── Marka ───────────────────────────────────────────────────────────── */
+
+.ac-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 14px;
+}
+
+.ac-brand > svg { color: #e0a63c; flex: 0 0 auto; }
+
+.ac-brand-name {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  color: #efece7;
+}
+
+.ac-brand-ver {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  color: #5f5c58;
+  border: 1px solid #24272a;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.ac-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: #22262a;
+  margin-right: 8px;
+  flex: 0 0 auto;
+}
+
+/* ─── Zakładki trybów ─────────────────────────────────────────────────────
+   height:30px; padding:0 13px; gap:7px; radius:7px                          */
+
+.ac-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ac-nav-tab {
+  height: 30px;
+  padding: 0 13px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #7a7772;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .16s, color .16s;
+}
+
+.ac-nav-tab:hover { background: #191c1f; color: #e6e4e0; }
+
+.ac-nav-tab.active {
+  background: rgba(224, 166, 60, .13);
+  color: #e8b757;
+}
+
+/* Plakietka licznika starć — czerwień zarezerwowana dla strony przeciwnika. */
+.ac-nav-badge {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 99px;
+  background: rgba(217, 99, 90, .16);
+  color: #e08078;
+}
+
+/* Kropka „detekcja aktywna" — makieta nie ma jej w nawigacji, zostaje
+   z obecnej aplikacji, ostylowana pod ten pasek. */
+.ac-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: #86b06a;
+  animation: acBlink 1.4s infinite;
+}
+
+.ac-nav-spacer { flex: 1; }
+
+/* ─── Prawa strona: zegar, sterowanie, styl ──────────────────────────────── */
+
+.ac-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ac-clock {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.ac-clock-label {
+  font-size: 10.5px;
+  color: #5f5c58;
+}
+
+.ac-clock-value {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: #e6e4e0;
+  letter-spacing: .02em;
+}
+
+.ac-simctl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Start/Pauza — zieleń gdy zatrzymana (można ruszyć), czerwień gdy w toku. */
+.ac-sim-btn {
+  height: 28px;
+  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 7px;
+  border: 1px solid rgba(134, 176, 106, .45);
+  background: rgba(134, 176, 106, .12);
+  color: #98c07c;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s;
+}
+
+.ac-sim-btn.running {
+  border-color: rgba(217, 99, 90, .45);
+  background: rgba(217, 99, 90, .12);
+  color: #e08078;
+}
+
+/* ─── Segmentowane grupy (mnożniki, styl) ────────────────────────────────
+   ramka 1px #24272a, radius 7px, wysokość 28px, przyciski 26px             */
+
+.ac-seg {
+  display: flex;
+  align-items: center;
+  border: 1px solid #24272a;
+  border-radius: 7px;
+  overflow: hidden;
+  height: 28px;
+}
+
+.ac-seg-btn {
+  height: 26px;
+  border: 0;
+  background: transparent;
+  color: #7a7772;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 0 11px;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+/* Mnożniki są w monospace i mają stałą szerokość — inaczej pasek „oddycha". */
+.ac-seg-btn.mono {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  width: 32px;
+  padding: 0;
+}
+
+.ac-seg-btn.active {
+  background: rgba(224, 166, 60, .14);
+  color: #e8b757;
+}
+
+/* Przełącznik „Styl" (THEMES: Grafit / Warstwa / Kontur) został na życzenie
+   usunięty z paska. Definicje zmiennych panelu nie są tu powtarzane — gdyby
+   wrócił, jego specyfikacja jest w makiecie (obiekt THEMES) i w historii gita. */

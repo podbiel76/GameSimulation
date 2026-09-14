@@ -3,7 +3,7 @@ Unit area service — creates PostGIS-backed responsibility areas.
 Generates square polygons around unit positions using geodesic calculations.
 """
 import math
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException
 from shapely.geometry import Polygon, Point
 from shapely.validation import explain_validity
@@ -249,8 +249,22 @@ def get_unit_areas(db: Session, unit_id: str):
 
 
 def get_all_areas(db: Session):
-    """Get all areas across all units."""
-    return db.query(models.UnitArea).order_by(models.UnitArea.created_at).all()
+    """
+    Get all areas across all units.
+
+    Konsumenci (get_full_state_data) czytają `a.unit.echelon` oraz
+    `a.unit.parent_links[0].parent_unit_id` dla każdego obszaru — bez eager loadingu
+    dawało to 2 dodatkowe zapytania na obszar (N+1). `units`, `routes` i `tracks`
+    w full-state miały joinedload, `areas` nie.
+    """
+    return (
+        db.query(models.UnitArea)
+        .options(
+            joinedload(models.UnitArea.unit).joinedload(models.Unit.parent_links)
+        )
+        .order_by(models.UnitArea.created_at)
+        .all()
+    )
 
 
 

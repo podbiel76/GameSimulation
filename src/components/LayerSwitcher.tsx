@@ -1,4 +1,4 @@
-import type { LayerName, BaseLayerType } from "./MapView";
+import type { LayerName, BaseLayerType } from "../types/map";
 
 type LayerConfig = {
   name: LayerName;
@@ -12,19 +12,19 @@ const LAYERS: LayerConfig[] = [
     name: "detections",
     label: "Detekcje",
     description: "Wykryte symbole i obiekty",
-    color: "#2563eb",
+    color: "var(--side-friendly)",
   },
   {
     name: "tracks",
     label: "Ścieżki ruchu",
     description: "Trasy i szlaki przemieszczania",
-    color: "#10b981",
+    color: "var(--ok)",
   },
   {
     name: "assessments",
     label: "Oceny / Alerty",
     description: "Reguły i alerty zagrożeń",
-    color: "#f59e0b",
+    color: "var(--accent)",
   },
 ];
 

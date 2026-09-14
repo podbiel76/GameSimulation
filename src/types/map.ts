@@ -5,6 +5,14 @@ export type RoutePoint = {
   order: number;
 };
 
+/**
+ * Grafika zadania APP-6A (makieta: TASK_ABBR / TASK_LABEL):
+ *  · adv — oś natarcia (Axis of Advance): gruba strzałka obrysowa,
+ *  · atk — kierunek natarcia (Direction of Attack): linia z pełnym grotem,
+ *  · mvt — marsz / trasa (Route): linia przerywana z punktami zwrotu.
+ */
+export type RouteTask = "adv" | "atk" | "mvt";
+
 export type ScenarioMarker = {
   id: string;
   symbolId: string;
@@ -12,10 +20,29 @@ export type ScenarioMarker = {
   x: number;
   y: number;
   route: RoutePoint[];
+  /** Domyślnie „mvt" — trasa marszu. Żyje tyle, co trasa (stan sesji). */
+  task?: RouteTask;
   destroyed?: boolean;
+  /** Strona konfliktu — kolor trasy i AO. */
+  side?: string;
+  /** Skrócone oznaczenie jednostki do podpisów na mapie, np. „7 kppanc". */
+  label?: string;
 };
 
 export type EditorMode = "idle" | "draw-route" | "draw-area" | "edit-area" | "draw-subordinate-area";
+
+// ─── Typy warstw mapy ───
+// Mieszkały wcześniej w components/MapView.tsx (martwy duplikat map/MapView.tsx).
+// Oba pliki definiowały własny BaseLayerType — dwa niezależne źródła tej samej nazwy.
+
+export type LayerName = "detections" | "tracks" | "assessments";
+
+export type BaseLayerType = "osm" | "dark" | "geoportal_orto" | "geoportal_topo" | "terrain";
+
+export type FeatureSelectPayload = {
+  layer: LayerName;
+  properties: Record<string, unknown>;
+};
 
 export type MapDetection = {
   id: string;
@@ -67,6 +94,14 @@ export type UnitLogistics = {
 
   // Paliwo
   fuel_liters: number;
+  // Pojemność zbiorników — istnieje w bazie (models.UnitLogistics) i w modelu
+  // potencjału (ExtendedLogistics), a brakowało jej w typie frontendu.
+  // Bez niej procent paliwa liczył się względem domyślnej pojemności szczebla.
+  fuel_capacity_liters: number | null;
+
+  // Zaopatrzenie
+  supply_priority: string | null;
+  evacuation_required: boolean | null;
 
   // Statusy jakościowe (używane jako mnożniki w modelu)
   combat_effectiveness_percent: number | null; // 0–100, ogólna sprawność bojowa

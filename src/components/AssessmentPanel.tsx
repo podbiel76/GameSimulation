@@ -6,10 +6,10 @@ type Props = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  critical: "#ef4444",
-  warning: "#f59e0b",
-  ok: "#10b981",
-  uncertain: "#8b5cf6",
+  critical: "var(--side-hostile)",
+  warning: "var(--accent)",
+  ok: "var(--ok)",
+  uncertain: "var(--accent-deep)",
 };
 
 const SEVERITY_ICONS: Record<string, string> = {
@@ -46,7 +46,7 @@ export default function AssessmentPanel({ assessments, selectedUnitId }: Props) 
           <div
             key={a.id}
             className="assess-item"
-            style={{ borderLeftColor: STATUS_COLORS[a.status] || "#64748b" }}
+            style={{ borderLeftColor: STATUS_COLORS[a.status] || "var(--text-dim)" }}
           >
             <div className="assess-header">
               <span>{SEVERITY_ICONS[a.severity] || "⚪"}</span>
@@ -54,7 +54,7 @@ export default function AssessmentPanel({ assessments, selectedUnitId }: Props) 
               <span
                 className="assess-status-badge"
                 style={{
-                  background: STATUS_COLORS[a.status] || "#64748b",
+                  background: STATUS_COLORS[a.status] || "var(--text-dim)",
                 }}
               >
                 {a.status.toUpperCase()}
