@@ -1,0 +1,669 @@
+{
+ "scenario": "porazka_strony_prog",
+ "description": "Strona z potencjałem poniżej progu przegrywa starcie przy pierwszym sprawdzeniu.",
+ "seed": 20260914,
+ "timeScale": 60,
+ "ticks": 40,
+ "snapshotEvery": 5,
+ "frames": [
+  {
+   "tick": 0,
+   "clockSec": 0,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "incomplete",
+     "personnel": [
+      150,
+      300,
+      150
+     ],
+     "ammo": {
+      "sa": 300,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 500,
+     "ce": 10
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 500,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 5,
+   "clockSec": 30,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 10,
+   "clockSec": 60,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 15,
+   "clockSec": 90,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 20,
+   "clockSec": 120,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 25,
+   "clockSec": 150,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 30,
+   "clockSec": 180,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 35,
+   "clockSec": 210,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  },
+  {
+   "tick": 40,
+   "clockSec": 240,
+   "units": [
+    {
+     "id": "F1",
+     "x": 2226389.816,
+     "y": 6800125.454,
+     "readiness": "destroyed",
+     "personnel": [
+      143,
+      305,
+      152
+     ],
+     "ammo": {
+      "sa": 268,
+      "at": 0,
+      "mortar": 0,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 2,
+      "mortars": 0,
+      "drones": 0
+     },
+     "fuel": 499.76,
+     "ce": 9.8836
+    },
+    {
+     "id": "H1",
+     "x": 2228826.209,
+     "y": 6800125.454,
+     "readiness": "ready",
+     "personnel": [
+      600,
+      0,
+      0
+     ],
+     "ammo": {
+      "sa": 10000,
+      "at": 50,
+      "mortar": 700,
+      "main": null
+     },
+     "vehicles": {
+      "tanks": 0,
+      "ifv": 40,
+      "mortars": 18,
+      "drones": 4
+     },
+     "fuel": 495.2,
+     "ce": 100
+    }
+   ],
+   "routesLeft": {
+    "F1": 0,
+    "H1": 0
+   },
+   "aoFirstVertex": {
+    "F1": [
+     19.985409,
+     51.9909563
+    ],
+    "H1": [
+     20.0072955,
+     51.9909563
+    ]
+   },
+   "engagements": []
+  }
+ ],
+ "events": [
+  {
+   "tick": 0,
+   "type": "engagement_start",
+   "key": "F1|vs|H1",
+   "attackerSide": null
+  },
+  {
+   "tick": 0,
+   "type": "unit_defeated",
+   "unitId": "F1",
+   "kind": "side_defeated"
+  },
+  {
+   "tick": 1,
+   "type": "engagement_end",
+   "key": "F1|vs|H1",
+   "ticks": 1
+  }
+ ]
+}

@@ -30,7 +30,13 @@ from rl.env import MicroBattleEnv, _DIRS, _MOVE_LOOKAHEAD_M
 from rl.sim import Engagement, Simulation, SimUnit, polygons_overlap
 from rl.terrain.grid import TerrainGrid
 
-TERRAIN_PATH = os.environ.get("AGENT_TERRAIN", "rl/terrain/data/region_otm.npz")
+# Siatka z ESA WorldCover (rl/terrain/export_worldcover.py) — ten sam teren co w grze.
+# Stara siatka z kolorów kafelków OSM zostaje zapasem, gdy eksportu jeszcze nie ma.
+_WORLDCOVER_GRID = "rl/terrain/data/region_worldcover.npz"
+TERRAIN_PATH = os.environ.get(
+    "AGENT_TERRAIN",
+    _WORLDCOVER_GRID if os.path.exists(_WORLDCOVER_GRID) else "rl/terrain/data/region_otm.npz",
+)
 # Model attention (6 slotów): obsługuje 1–6 jednostek i nierówne siły (obserwacja tokenowa).
 # Trenowany z asymetrią + nagrodą taktyczną → koncentracja przy przewadze, odwrót przy niedoborze,
 # skalowanie (5v5/5v3). PPO.load wymaga importu rl.policy (rejestracja ekstraktora).

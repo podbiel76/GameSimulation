@@ -102,10 +102,10 @@ export type AttritionComponents = {
  * Stochastic integer rounding: raw=0.216 → 21.6% chance of 1, else 0.
  * Ensures correct EXPECTED loss rate even for sub-1 values.
  */
-function stochRound(raw: number): number {
+function stochRound(raw: number, rng: () => number = Math.random): number {
   if (raw <= 0) return 0;
   const floor = Math.floor(raw);
-  return floor + (Math.random() < (raw - floor) ? 1 : 0);
+  return floor + (rng() < (raw - floor) ? 1 : 0);
 }
 
 /**
@@ -279,27 +279,30 @@ export function computeAttritionComponents(
   defUnit: UnitLike,
   baseLoss: number,
   attackerProfile: AttackerProfile,
+  /** Generator losowy symulacji (seedowany); domyślnie Math.random — golden cases i testy. */
+  rng: () => number = Math.random,
 ): AttritionComponents {
   const raw = computeAttritionRaw(defUnit, baseLoss, attackerProfile);
+  const round = (value: number) => stochRound(value, rng);
 
-  const personnelLoss    = stochRound(raw.personnelLoss);
-  const personnelDead    = stochRound(personnelLoss * 0.30);
+  const personnelLoss    = round(raw.personnelLoss);
+  const personnelDead    = round(personnelLoss * 0.30);
   const personnelWounded = personnelLoss - personnelDead;
 
   return {
     personnelLoss,
     personnelDead,
     personnelWounded,
-    tankLoss:             stochRound(raw.tankLoss),
-    ifvLoss:              stochRound(raw.ifvLoss),
-    armoredArtilleryLoss: stochRound(raw.armoredArtilleryLoss),
-    mortarLoss:           stochRound(raw.mortarLoss),
-    droneLoss:            stochRound(raw.droneLoss),
-    ammoSmallArmsBurn:    stochRound(raw.ammoSmallArmsBurn),
-    ammoMainBurn:         stochRound(raw.ammoMainBurn),
-    ammoSecondaryBurn:    stochRound(raw.ammoSecondaryBurn),
-    ammoAtBurn:           stochRound(raw.ammoAtBurn),
-    mortarAmmoBurn:       stochRound(raw.mortarAmmoBurn),
+    tankLoss:             round(raw.tankLoss),
+    ifvLoss:              round(raw.ifvLoss),
+    armoredArtilleryLoss: round(raw.armoredArtilleryLoss),
+    mortarLoss:           round(raw.mortarLoss),
+    droneLoss:            round(raw.droneLoss),
+    ammoSmallArmsBurn:    round(raw.ammoSmallArmsBurn),
+    ammoMainBurn:         round(raw.ammoMainBurn),
+    ammoSecondaryBurn:    round(raw.ammoSecondaryBurn),
+    ammoAtBurn:           round(raw.ammoAtBurn),
+    mortarAmmoBurn:       round(raw.mortarAmmoBurn),
     fuelBurn:             raw.fuelBurn,
     ceDrop:               raw.ceDrop,
   };

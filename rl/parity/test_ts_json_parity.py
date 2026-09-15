@@ -34,6 +34,8 @@ from rl.constants import load_constants
 _ROOT = Path(__file__).resolve().parent.parent.parent
 _TS_POTENTIAL = _ROOT / "src" / "utils" / "combatPotential.ts"
 _TS_SIM = _ROOT / "src" / "hooks" / "useLocalSimulation.ts"
+# Od fazy 3 stałe pętli mieszkają w silniku; hook trzyma tylko stałe zapisu do backendu.
+_TS_ENGINE = _ROOT / "src" / "sim" / "engine.ts"
 
 
 def _read(path: Path) -> str:
@@ -109,6 +111,7 @@ def test_echelon_caps_match() -> None:
 @pytest.mark.parametrize(
     "ts_name, pattern, json_key",
     [
+        ("TICK_MS", r"export const TICK_MS\s*=\s*([\d.]+)", "tick_ms"),
         ("ENGAGEMENT_CHECK_TICKS", r"ENGAGEMENT_CHECK_TICKS\s*=\s*([\d.]+)", "engagement_check_ticks"),
         ("ATTRITION_PERSIST_TICKS", r"ATTRITION_PERSIST_TICKS\s*=\s*([\d.]+)", "attrition_persist_ticks"),
         ("ATTRITION_COEFFICIENT", r"ATTRITION_COEFFICIENT\s*=\s*([\d.]+)", "attrition_coefficient"),
@@ -120,7 +123,7 @@ def test_echelon_caps_match() -> None:
     ],
 )
 def test_simulation_scalars_match(ts_name: str, pattern: str, json_key: str) -> None:
-    src = _read(_TS_SIM)
+    src = _read(_TS_ENGINE) + "\n" + _read(_TS_SIM)
     match = re.search(pattern, src)
     assert match, f"Nie znaleziono {ts_name} w useLocalSimulation.ts"
     ts_value = float(match.group(1))
@@ -131,7 +134,7 @@ def test_simulation_scalars_match(ts_name: str, pattern: str, json_key: str) -> 
 
 
 def test_terrain_speed_modifiers_match() -> None:
-    src = _read(_TS_SIM)
+    src = _read(_TS_ENGINE) + "\n" + _read(_TS_SIM)
     start = src.index("TERRAIN_SPEED_MODIFIERS")
     block = src[start : src.index("};", start)]
     ts = {m.group(1): float(m.group(2)) for m in re.finditer(r"(\w+):\s*([\d.]+)", block)}

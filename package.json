@@ -8,7 +8,9 @@
     "dev:vite": "vite",
     "dev:api": "node server/proxy.mjs",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:update": "vitest run -u"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -27,6 +29,7 @@
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.7.0",
     "typescript": "~6.0.2",
-    "vite": "^7.3.3"
+    "vite": "^7.3.3",
+    "vitest": "^5.0.0"
   }
 }
